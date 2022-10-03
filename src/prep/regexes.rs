@@ -8,6 +8,7 @@ and
 use lazy_static::lazy_static;
 use regex::Regex;
 
+
 fn string_to_static_str(s: String) -> &'static str {
     // https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
     Box::leak(s.into_boxed_str())
@@ -66,7 +67,7 @@ lazy_static! {
     static ref QUOTES_PAT: Regex = Regex::new(r#"[“”«»]"#).unwrap();
     static ref APOSTROPHES_PAT: Regex = Regex::new(r#"[‘’]"#).unwrap();
     static ref URL_PAT: Regex = Regex::new(&URL).unwrap();
-    static ref RT_MENTION_PAT: Regex = Regex::new(r#"^RT " + MENTION + ": "#).unwrap();
+    static ref RT_MENTION_PAT: Regex = Regex::new(&(r#"^RT "#.to_string() + &MENTION + &r#": "#.to_string())).unwrap();
 
     // join all together
     static ref _TOKEN_PIPELINE: [&'static str; 12] = [
