@@ -8,3 +8,5 @@ authors = ["yubokai8@gmail.com"]
 [dependencies]
 regex = "1.6.0"
 lazy_static = "1.4.0"
+unicode_categories = "0.1.1"
+emojis = "0.5.0"
