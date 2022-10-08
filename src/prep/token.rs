@@ -11,56 +11,104 @@ pub struct Token {
     pub value: String,
 }
 
-impl Token {
-    pub fn set_value(&mut self, new_value: String) {
+fn _is_punct(value: &str) -> bool {
+    value.len() == 1 && value.chars().next().unwrap().is_punctuation()
+}
+
+fn _is_emoji(value: &str) -> bool {
+    let emoji_opt = emojis::get(value);
+    match emoji_opt {
+        Some(_emoji) => true,
+        _ => false
+    }
+}
+
+fn _check_flag(value: &str, pattern: &str) -> bool {
+    let compiled_pattern:Regex = Regex::new(&format!(r"^{}$", pattern)).unwrap();
+    compiled_pattern.is_match(value)
+}
+
+pub trait TokenTrait {
+    fn set_value(&mut self, new_value: String) -> ();
+
+    fn is_emoji(&self) -> bool;
+
+    fn is_punct(&self) -> bool;
+
+    fn check_flag(&self, pattern: &str) -> bool;
+
+    fn is_hashtag(&self) -> bool {
+        !self.check_flag(*NOT_A_HASHTAG) & self.check_flag(*HASHTAG)
+    }
+
+    fn is_url(&self) -> bool {
+        self.check_flag(*URL)
+    }
+
+    fn is_mention(&self) -> bool {
+        self.check_flag(*MENTION)
+    }
+
+    fn is_emoticon(&self) -> bool {
+        self.check_flag(*EMOTICONS)
+    }
+
+    fn is_digit(&self) -> bool {
+        self.check_flag(*DIGIT)
+    }
+
+    fn is_email(&self) -> bool {
+        self.check_flag(*EMAIL)
+    }
+
+    fn is_html_tag(&self) -> bool {
+        self.check_flag(*HTML_TAG)
+    }
+}
+
+impl TokenTrait for Token {
+    fn set_value(&mut self, new_value: String) {
         self.value = new_value;
     }
 
-    // TODO: __getitem__ and __setitem__
-
-    pub fn _check_flag(&self, pattern: &str) -> bool {
-        let compiled_pattern:Regex = Regex::new(&format!(r"^{}$", pattern)).unwrap();
-        compiled_pattern.is_match(&self.value)
+    fn is_emoji(&self) -> bool {
+        _is_emoji(&self.value)
     }
 
-    pub fn is_hashtag(&self) -> bool {
-        !self._check_flag(*NOT_A_HASHTAG) & self._check_flag(*HASHTAG)
+    fn is_punct(&self) -> bool {
+        _is_punct(&self.value)
     }
 
-    pub fn is_url(&self) -> bool {
-        self._check_flag(*URL)
+    fn check_flag(&self, pattern: &str) -> bool {
+        _check_flag(&self.value, pattern)
     }
 
-    pub fn is_mention(&self) -> bool {
-        self._check_flag(*MENTION)
+    fn is_hashtag(&self) -> bool {
+        !self.check_flag(*NOT_A_HASHTAG) & self.check_flag(*HASHTAG)
     }
 
-    pub fn is_emoticon(&self) -> bool {
-        self._check_flag(*EMOTICONS)
+    fn is_url(&self) -> bool {
+        self.check_flag(*URL)
     }
 
-    pub fn is_emoji(&self) -> bool {
-        let emoji_opt = emojis::get(&self.value);
-        match emoji_opt {
-            Some(_emoji) => true,
-            _ => false
-        }
+    fn is_mention(&self) -> bool {
+        self.check_flag(*MENTION)
     }
 
-    pub fn is_digit(&self) -> bool {
-        self._check_flag(*DIGIT)
+    fn is_emoticon(&self) -> bool {
+        self.check_flag(*EMOTICONS)
     }
 
-    pub fn is_email(&self) -> bool {
-        self._check_flag(*EMAIL)
+    fn is_digit(&self) -> bool {
+        self.check_flag(*DIGIT)
     }
 
-    pub fn is_html_tag(&self) -> bool {
-        self._check_flag(*HTML_TAG)
+    fn is_email(&self) -> bool {
+        self.check_flag(*EMAIL)
     }
 
-    pub fn is_punct(&self) -> bool {
-        self.value.len() == 1 && self.value.chars().next().unwrap().is_punctuation()
+    fn is_html_tag(&self) -> bool {
+        self.check_flag(*HTML_TAG)
     }
 }
 
@@ -134,5 +182,33 @@ impl Action {
             }
         }
         return false
+    }
+}
+
+pub struct WeiboToken {
+    pub value: String,
+}
+
+impl TokenTrait for WeiboToken {
+    // TODO: Actually the only diff btw. WeiboToken and Token is is_hashtag
+    // but we have dupilcated code
+    fn set_value(&mut self, new_value: String) {
+        self.value = new_value;
+    }
+
+    fn is_emoji(&self) -> bool {
+        _is_emoji(&self.value)
+    }
+
+    fn is_punct(&self) -> bool {
+        _is_punct(&self.value)
+    }
+
+    fn check_flag(&self, pattern: &str) -> bool {
+        _check_flag(&self.value, pattern)
+    }
+
+    fn is_hashtag(&self) -> bool {
+        self.check_flag(*WEIBO_HASHTAG)
     }
 }

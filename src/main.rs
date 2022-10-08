@@ -2,7 +2,7 @@ pub mod prep;
 pub mod constants;
 pub mod utils;
 
-use crate::prep::token::Token;
+use crate::prep::token::{TokenTrait, Token};
 use emojis;
 
 fn main() {
