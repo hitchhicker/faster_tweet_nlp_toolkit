@@ -95,31 +95,44 @@ impl Action {
         })
     }
 
-    fn is_valid_action(&self) -> bool {
-        // TODO:
-        /*
-        if not hasattr(token_obj, self._action_condition):
-            raise ValueError(f"{token_obj.__class__.__name__} doesn't has attribute {self._action_condition}")
-        if self._action_name not in self.ACTION_MAPPING[self._action_condition]:
-            raise ValueError(
-                f"unknown action '{self._action_name}', expected {self.ACTION_MAPPING[self._action_condition]}"
-            )
-        return True
-         */
-        true
+    fn check_action(&self) -> () {
+        match ACTION_MAPPING.get(&self.action_condition as &str)  {
+            Some(actions) =>  {
+                if !actions.contains(&self.action_name.as_str()) {
+                    panic!(
+                        "Unknown action {action_name}, expected {expected_actions}",
+                        action_name=self.action_name, expected_actions=
+                        ACTION_MAPPING.get(&self.action_condition as &str).unwrap().join(",")
+                    );
+                }
+            }
+            _ => return,
+        }
     }
 
     pub fn apply(&self, token: &mut Token) -> bool {
-        if !self.is_valid_action() {
-            return false
+        self.check_action();
+        let is_condition_matched = match self.action_condition.as_str() {
+            "is_mention" => token.is_mention(),
+            "is_hashtag" => token.is_hashtag(),
+            "is_url" => token.is_url(),
+            "is_digit" => token.is_digit(),
+            "is_emoji" => token.is_emoji(),
+            "is_emoticon" => token.is_emoticon(),
+            "is_punct" => token.is_punct(),
+            "is_email" => token.is_email(),
+            "is_html_tag" => token.is_html_tag(),
+            &_ => false
+        };
+        if is_condition_matched {
+            match self.action_name.as_str() {
+                "remove" => self.remove(token),
+                "tag" => self.tag(token),
+                "demojize" => self.demojize(token),
+                "emojize" => self.emojize(token),
+                &_ => return false,
+            }
         }
-        match self.action_name.as_str() {
-            "remove" => self.remove(token),
-            "tag" => self.tag(token),
-            "demojize" => self.demojize(token),
-            "emojize" => self.emojize(token),
-            &_ => return false,
-        }
-        true
+        return false
     }
 }
