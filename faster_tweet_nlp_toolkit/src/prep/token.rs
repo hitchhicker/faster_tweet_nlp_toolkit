@@ -4,6 +4,7 @@ use crate::prep::regexes::*;
 use crate::constants::*;
 use unicode_categories::UnicodeCategories;
 use emojis;
+use rstest::rstest;
 
 
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -210,5 +211,39 @@ impl TokenTrait for WeiboToken {
 
     fn is_hashtag(&self) -> bool {
         self.check_flag(*WEIBO_HASHTAG)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    
+    #[rstest]
+    #[case("#emnlp2019", true)]
+    #[case("#prédéfinie", true)]  // non ascii
+    #[case("#Филмскисусрети", true)]
+    #[case("#정국생일ᄎᄏ", true)]
+    #[case("#123", false)]  // # a hashtag can't be just a seq of numbers
+    fn test_is_hashtag(#[case] value: String, #[case] expected: bool) {
+        let mut token = Token {value: String::from(value)};
+        assert_eq!(expected, token.is_hashtag())
+    }
+
+    #[rstest]
+    #[case("https://buff.ly/2Uclr2A", true)]
+    #[case("www.google.fr", true)] // # without leading http(s)
+    fn test_is_url(#[case] value: String, #[case] expected: bool) {
+        let mut token = Token {value: String::from(value)};
+        assert_eq!(expected, token.is_url())
+    }
+
+    #[rstest]
+    #[case("@tutu", true)]
+    #[case("@@", false)]  // # not valid mention
+    #[case("tutu@gmail.com", false)]  // # email
+    fn test_is_mention(#[case] value: String, #[case] expected: bool) {
+        let mut token = Token {value: String::from(value)};
+        assert_eq!(expected, token.is_mention())
     }
 }
