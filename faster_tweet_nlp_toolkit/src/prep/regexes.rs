@@ -55,7 +55,7 @@ lazy_static! {
         &_REST_EMOTICONS,
     ];
     pub static ref EMOTICONS: &'static str = string_to_static_str(_EMOTICONS.map(|x| x.to_string()).join(""));
-    pub static ref EMAIL: &'static str = r#"(?:^|(?<=[^\w@.)]))(?:[\w+-](?:\.(?!\.))?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|(?=\b))"#;
+    pub static ref EMAIL: &'static str = r#"(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)"#;
     pub static ref URL: &'static str = r#"(?:https?://[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})"#;
     pub static ref CAMEL_SPLIT: &'static str = r#"((?<=[a-z])[A-Z]|(?<!^)[A-Z](?=[a-z])|[0-9]+|(?<=[0-9\\-\\_])[A-Za-z]|[\\-\\_])"#;
     pub static ref HTML_TAG: &'static str = r#"<[^>\s]+>"#;
