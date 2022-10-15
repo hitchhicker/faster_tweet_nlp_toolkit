@@ -190,7 +190,7 @@ pub struct WeiboToken {
 }
 
 impl WeiboToken {
-    fn new(value: String) -> WeiboToken {
+    pub fn new(value: String) -> WeiboToken {
         WeiboToken {token: Token{value: String::from(value)}}
     }
 
@@ -242,8 +242,6 @@ impl WeiboToken {
 
 #[cfg(test)]
 mod tests {
-
-    use std::char::ToLowercase;
 
     use super::*;
     

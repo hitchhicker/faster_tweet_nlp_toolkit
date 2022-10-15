@@ -19,7 +19,7 @@ lazy_static! {
     pub static ref HASHTAG: &'static str = r#"\#\b[\w\-_]+\b"#;
     pub static ref WEIBO_HASHTAG: &'static str = r#"\#[^#]+#"#;
     pub static ref NOT_A_HASHTAG: &'static str = r#"\#\b[\d]+\b"#;
-    pub static ref WORD: &'static str = r#"(?:[^\W\d|(?:_](?:[^\W\d_]|['\-_]|[\u0e00-\u0e7f])+[^\W\d_]?)[^\W\d\w_]?"#;
+    pub static ref WORD: &'static str = r#"(?:[^\W\d|(?:_](?:[^\W\d_]|['\-_]|[\u0e00-\u0e7f])+[^\W\d_]?)[^\W\d]?"#;
     pub static ref MENTION:&'static str = r#"@\w+"#;
     pub static ref _LTR_EMOTICON: [&'static str; 5] = [
         // optional hat
@@ -71,8 +71,8 @@ lazy_static! {
     pub static ref RT_MENTION_PAT: Regex = Regex::new(&(r#"^RT "#.to_string() + &MENTION + &r#": "#.to_string())).unwrap();
 
     // join all together
-    static ref _TOKEN_PIPELINE: [&'static str; 12] = [
-        &URL, &EMAIL, &MENTION, &HASHTAG, &EMOTICONS, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
+    static ref _TOKEN_PIPELINE: [&'static str; 11] = [
+        &URL, &EMAIL, &MENTION, &HASHTAG, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
     ];
     static ref TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.map(|x| x.to_string()).join(r"|"));
     pub static ref TWEET_TOKENIZE: Regex = Regex::new(&TOKEN_PIPELINE).unwrap();
