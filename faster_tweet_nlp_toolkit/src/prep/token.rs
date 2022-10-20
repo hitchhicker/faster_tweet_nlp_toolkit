@@ -1,4 +1,5 @@
 #![allow(dead_code, unused)]
+use std::fmt::Display;
 use std::ops::{Index, IndexMut};
 
 use regex::Regex;
@@ -9,9 +10,15 @@ use emojis;
 use rstest::rstest;
 
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 pub struct Token<'a>{
     pub value: &'a str,
+}
+
+impl <'a> Display for Token<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
 }
 
 fn _is_punct(value: &str) -> bool {

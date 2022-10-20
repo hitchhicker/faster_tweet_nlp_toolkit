@@ -1,15 +1,18 @@
 #![allow(dead_code, unused)]
 use std::ops::{Index, IndexMut};
 
+use itertools::Itertools;
+use regex::Regex;
+
 use crate::prep::token::{Token, Action};
 
 pub struct ParsedText<'a> {
     tokens: Vec<Token<'a>>,
-    split: String,
+    split: &'a str,
     value: Option<String>,
 }
 
-impl ParsedText <'_>  {
+impl <'a> ParsedText <'a>{
     pub fn len(&self) -> usize {
         self.tokens.len()
     }
@@ -43,9 +46,25 @@ impl ParsedText <'_>  {
                 }
             }
         }
-        // TODO
-        // self._tokens = [token for token in self.tokens if len(token)]  # filter removed tokens
+        self.tokens = self.tokens.iter().filter(|token| token.value.len() > 0).map(|x|*x).collect::<Vec<_>>()
     }
+
+    pub fn post_process(&mut self) -> () {
+        let text = self.value();
+        let re = Regex::new(r"\s+").unwrap();
+        let result = re.replace_all(text, " ");
+        self.value = Some(text.trim().to_string());
+    }
+
+    pub fn value(&mut self) -> &str {
+        if self.value.is_none() {
+            let names = ["firstName", "lastName"];
+            let joined = names.join(", ");
+            self.value = Some(String::from(self.tokens.iter().join(self.split)))
+        }
+        return &self.value.as_ref().unwrap()
+    }
+
 }
 
 impl <'a> Index<usize> for ParsedText<'a>{
@@ -55,7 +74,7 @@ impl <'a> Index<usize> for ParsedText<'a>{
     }
 }
 
-impl IndexMut<usize> for ParsedText<'_> {
+impl <'a> IndexMut<usize> for ParsedText<'a> {
     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
         &mut self.tokens[i]
     }
