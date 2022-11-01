@@ -207,10 +207,8 @@ pub fn preprocess_text(
 
     let pattern:Regex = Regex::new(r#"(?:P<x>\w+)\?(?:P<y>\w+)"#).unwrap();
     text = String::from(pattern.replace_all(&text, "$x'$y"));
-    /*
-    TODO:
-    text = html.unescape(text)  # &pound;100 -> £100
-    */
+
+    text = html_escape::decode_html_entities(&text).to_string();
     return text
 }
 
@@ -236,7 +234,6 @@ pub fn myfunc(
 ) -> ParsedText{
     let clean_text = preprocess_text(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len);
     return parse_text(clean_text, tokenizer, filters, emojis, mentions, hashtags, urls, digits, emoticons, puncts, emails, html_tags, stop_words)
-
 }
 
 pub fn reduce_lengthening(text: &str) -> String {
