@@ -1,8 +1,10 @@
 #![allow(dead_code, unused)]
-use std::{ops::{Index, IndexMut}, collections::HashSet};
+use std::{ops::{Index, IndexMut}, collections::HashSet, borrow::Borrow, char::REPLACEMENT_CHARACTER};
 
 use itertools::Itertools;
+use lazy_static::__Deref;
 use regex::Regex;
+use encoding_rs::{self, REPLACEMENT};
 
 use crate::{prep::token::{Token, Action}, utils::{strip_accents_unicode, remove_variation_selectors}};
 
@@ -178,15 +180,16 @@ pub fn preprocess_text(
     reduce_len: Option<bool>
 ) -> String {
     if encoding.is_some() {
-        /*
-        TODO:
-        if encoding is not None:
-            text = text.encode(encoding, "surrogatepass").decode(encoding, "replace")
-            if remove_unencodable_char:
-                text = text.replace(UNENCODABLE_CHAR, " ")
-            else:  # change any sequence of unknown characters to a single one
-                text = re.sub(UNENCODABLE_CHAR + "{2,}", UNENCODABLE_CHAR, text)
-        */
+        if let Some(encoding_) = encoding_rs::Encoding::for_label(encoding.unwrap().as_bytes()) {
+            let (result, _encoding, _errors) = encoding_.encode(&text);
+            text = _encoding.decode(&result).0.to_string();
+        }
+        text = if remove_unencodable_char.unwrap_or(false) {
+            text.replace(REPLACEMENT_CHARACTER, "")
+        } else {
+            let pattern:Regex = Regex::new(&format!(r#"{}{{2,}}$"#, REPLACEMENT_CHARACTER)).unwrap();
+            pattern.replace_all(&text, REPLACEMENT_CHARACTER.to_string()).to_string()
+        };
     }
     if to_lower.unwrap_or(false) {
         text = text.to_lowercase();
