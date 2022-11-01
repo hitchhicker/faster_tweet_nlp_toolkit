@@ -21,12 +21,16 @@ impl Display for Token{
     }
 }
 
+
 fn _is_punct(value: &str) -> bool {
-    value.chars().next().unwrap().is_punctuation()
+    value.chars().all(|x|x.is_punctuation())
 }
 
 fn _is_emoji_alias(value: &str) -> bool {
-    let emoji_opt = emojis::get_by_shortcode(value);
+    if (! (value.starts_with(":") && value.ends_with(":"))) {
+        return false
+    }
+    let emoji_opt = emojis::get_by_shortcode(&value[1..value.len()-1]);
     match emoji_opt {
         Some(_emoji) => true,
         _ => false
@@ -133,13 +137,13 @@ impl Action{
 
     fn demojize(&self, token: &mut Token) -> () {
         token.set_value(match emojis::get(&token.value) {
-            Some(demoji) => demoji.shortcode().unwrap_or(&token.value).to_string(),
-            _ => token.value.to_string(),
+            Some(demoji) => format!(":{}:", demoji.shortcode().unwrap_or(&token.value)),
+            _ => format!(":{}:", &token.value)
         })
     }
 
     fn emojize(&self, token: &mut Token) -> () {
-        token.set_value(match emojis::get_by_shortcode(&token.value) {
+        token.set_value(match emojis::get_by_shortcode(&token.value[1..token.value.len()-1]) {
             Some(_emoji) => _emoji.to_string(),
             _ => token.value.to_string(),
         })
@@ -267,6 +271,7 @@ mod tests {
     #[rstest]
     #[case("https://buff.ly/2Uclr2A", true)]
     #[case("www.google.fr", true)] // # without leading http(s)
+    #[case("http://t.co/skU8zM7Slh", true)]
     fn test_is_url(#[case] value: String, #[case] expected: bool) {
         let mut token = Token {value: String::from(value)};
         assert_eq!(expected, token.is_url())
@@ -283,8 +288,8 @@ mod tests {
 
     #[rstest]
     #[case("😰", true)]
-    #[case("joy", true)]  // demojized emoji ('joy' is in the emoji alias)
-    #[case("notemoji", false)]
+    #[case(":joy:", true)]  // demojized emoji ('joy' is in the emoji alias)
+    #[case(":notemoji:", false)]
     fn test_is_emoji(#[case] value: String, #[case] expected: bool) {
         let mut token = Token {value: String::from(value)};
         assert_eq!(expected, token.is_emoji())
@@ -303,7 +308,10 @@ mod tests {
 
     #[rstest]
     #[case(",", true)]
+    #[case("。", true)]
     #[case("\u{2019}", true)]
+    #[case("@nlp", false)]
+    #[case("#nlp", false)]
     #[case("12", false)]  // the length of token is not 1
     fn test_is_punct(#[case] value: &str, #[case] expected: bool) {
         let mut token = Token {value: String::from(value)};
@@ -316,6 +324,14 @@ mod tests {
     fn test_is_email(#[case] value: &str, #[case] expected: bool) {
         let mut token = Token {value: value.to_owned()};
         assert_eq!(expected, token.is_email())
+    }
+    #[rstest]
+    #[case("<p>", true)]
+    #[case("</p>", true)]
+    #[case("</p", false)]
+    fn test_is_html_tag(#[case] value: &str, #[case] expected: bool) {
+        let mut token = Token {value: value.to_owned()};
+        assert_eq!(expected, token.is_html_tag())
     }
 
     #[test]
@@ -362,14 +378,14 @@ mod tests {
         let action = Action{action_name: Some(String::from("unittest")), action_condition: "unitest".to_owned()};
         let mut token = Token{value: "😀".to_owned()};
         action.demojize(&mut token);
-        assert_eq!(token.value, "grinning")
+        assert_eq!(token.value, ":grinning:")
     }
 
     #[test]
     fn test_action_emojize() {
         // arguments are not important here
         let action = Action{action_name: Some(String::from("unittest")), action_condition: "unitest".to_owned()};
-        let mut token = Token{value: "grinning".to_owned()};
+        let mut token = Token{value: ":grinning:".to_owned()};
         action.emojize(&mut token);
         assert_eq!(token.value, "😀")
     }

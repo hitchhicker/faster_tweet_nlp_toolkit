@@ -80,7 +80,7 @@ lazy_static! {
     static ref _WEIBO_TOKEN_PIPELINE: [&'static str; 12] = [
         &URL, &EMAIL, &MENTION, &HASHTAG, &EMOTICONS, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
     ];
-    static ref WEIBO_TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.map(|x| x.to_string()).join(r"|"));
+    static ref WEIBO_TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.join("|"));
     pub static ref WEIBO_TOKENIZE: Regex = Regex::new(&TOKEN_PIPELINE).unwrap();
 }
 
