@@ -97,10 +97,6 @@ impl Token{
         self.check_flag(*MENTION)
     }
 
-    pub fn is_emoticon(&self) -> bool {
-        self.check_flag(*EMOTICONS)
-    }
-
     pub fn is_digit(&self) -> bool {
         self.check_flag(*DIGIT)
     }
@@ -179,7 +175,6 @@ impl Action{
             "is_url" => token.is_url(),
             "is_digit" => token.is_digit(),
             "is_emoji" => token.is_emoji(),
-            "is_emoticon" => token.is_emoticon(),
             "is_punct" => token.is_punct(),
             "is_email" => token.is_email(),
             "is_html_tag" => token.is_html_tag(),
@@ -229,10 +224,6 @@ impl WeiboToken {
 
     pub fn is_mention(&self) -> bool {
         self.token.is_mention()
-    }
-
-    pub fn is_emoticon(&self) -> bool {
-        self.token.is_emoticon()
     }
 
     pub fn is_digit(&self) -> bool {
