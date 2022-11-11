@@ -2,7 +2,6 @@ faster_tweet_nlp_toolkit/targert
 faster_tweet_nlp_toolkit/Cargo.lock
 .DS_Store
 *~
-
 .vim
 .env
 target
