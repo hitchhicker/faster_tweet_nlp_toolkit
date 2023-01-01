@@ -68,6 +68,10 @@ Error:
 // }
 
 impl Token{
+    pub fn new(value: String) -> Self{
+        Self { value: value }
+    }
+
     pub fn set_value(&mut self, new_value: String) {
         self.value = new_value;
     }
@@ -193,8 +197,10 @@ impl Action{
         return true
     }
 }
+
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub struct WeiboToken{
-    token: Token,
+    pub token: Token,
 }
 
 impl WeiboToken {
