@@ -1,8 +1,7 @@
 #![allow(dead_code, unused)]
 use std::{ops::{Index, IndexMut}, collections::HashSet, borrow::Borrow, char::REPLACEMENT_CHARACTER};
-
 use itertools::Itertools;
-use lazy_static::__Deref;
+use lazy_static::{__Deref, lazy_static};
 use regex::Regex;
 use encoding_rs::{self, REPLACEMENT};
 
@@ -32,9 +31,6 @@ impl  ParsedText{
         emails_action: Option<&str>,
         html_tags_action: Option<&str>,
     ) -> () {
-        for token in &self.tokens {
-            println!("{}", &token.value);
-        }
         for token in &mut self.tokens {
             for action in [
                 &Action{action_name: mentions_action.map(|s| s.to_string()), action_condition: "is_mention".to_owned()},
@@ -175,7 +171,10 @@ pub fn preprocess_text(
         text = if remove_unencodable_char.unwrap_or(false) {
             text.replace(REPLACEMENT_CHARACTER, "")
         } else {
-            let pattern:Regex = Regex::new(&format!(r#"{}{{2,}}$"#, REPLACEMENT_CHARACTER)).unwrap();
+            lazy_static! {
+                static ref RE: Regex = Regex::new(&format!(r#"{}{{2,}}$"#, REPLACEMENT_CHARACTER)).unwrap();
+            }
+            let pattern: &Regex = &RE;
             pattern.replace_all(&text, REPLACEMENT_CHARACTER.to_string()).to_string()
         };
     }
@@ -190,10 +189,16 @@ pub fn preprocess_text(
     }
     text = remove_variation_selectors(&text);
 
-    let pattern:Regex = Regex::new(r#"([^ ])(https?://)"#).unwrap();
+    lazy_static! {
+        static ref HTTP_RE: Regex = Regex::new(r#"([^ ])(https?://)"#).unwrap();
+    }
+    let pattern: &Regex = &HTTP_RE;
     text = String::from(pattern.replace_all(&text, "$1 $2"));
 
-    let pattern:Regex = Regex::new(r#"(?:P<x>\w+)\?(?:P<y>\w+)"#).unwrap();
+    lazy_static! {
+        static ref REPEAT_RE: Regex = Regex::new(r#"(?:P<x>\w+)\?(?:P<y>\w+)"#).unwrap();
+    }
+    let pattern: &Regex = &REPEAT_RE;
     text = String::from(pattern.replace_all(&text, "$x'$y"));
 
     text = html_escape::decode_html_entities(&text).to_string();
@@ -219,12 +224,15 @@ pub fn parse_text(
     html_tags: Option<&str>,
 ) -> ParsedText{
     let clean_text = preprocess_text(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len);
-    return _parse_text(clean_text, tokenizer, filters, emojis, mentions, hashtags, urls, digits, puncts, emails, html_tags)
+    _parse_text(clean_text, tokenizer, filters, emojis, mentions, hashtags, urls, digits, puncts, emails, html_tags)
 }
 
 pub fn reduce_lengthening(text: &str) -> String {
-    let pattern:Regex = Regex::new(r#"(?:P<x>.)\1{2,3}"#).unwrap();
-    return String::from(pattern.replace_all(text, "$x"))
+    lazy_static! {
+        static ref LENGTHENING_RE: Regex = Regex::new(r#"(?:P<x>.)\1{2,3}"#).unwrap();
+    }
+    let pattern: &Regex = &LENGTHENING_RE;
+    String::from(pattern.replace_all(text, "$x"))
 }
 
 #[cfg(test)]

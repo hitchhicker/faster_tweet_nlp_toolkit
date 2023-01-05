@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use ftnt::{prep::token::*, constants::{REPLACE_MAPPINGS, ACTION_MAPPING}, regexes::WEIBO_HASHTAG};
+use ftnt::{prep::token::*, constants::{REPLACE_MAPPINGS, ACTION_MAPPING}, regexes::WEIBO_HASHTAG_RE};
 use pyo3::prelude::*;
 
 use emojis;
@@ -200,7 +200,7 @@ impl PyWeiboToken {
     }
 
     pub fn is_hashtag(&self) -> bool {
-        self.token.token.check_flag(*WEIBO_HASHTAG)
+        self.token.token.check_flag(&WEIBO_HASHTAG_RE)
     }
 
     pub fn is_url(&self) -> bool {

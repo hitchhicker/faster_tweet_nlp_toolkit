@@ -1,4 +1,5 @@
 #![allow(dead_code, unused)]
+#![feature(const_mut_refs)]
 use std::fmt::Display;
 use std::ops::{Index, IndexMut};
 
@@ -7,6 +8,7 @@ use crate::prep::regexes::*;
 use crate::constants::*;
 use unicode_categories::UnicodeCategories;
 use emojis;
+use lazy_static::lazy_static;
 use rstest::rstest;
 
 
@@ -84,33 +86,33 @@ impl Token{
         _is_punct(&self.value)
     }
 
-    pub fn check_flag(&self, pattern: &str) -> bool {
-        let compiled_pattern:Regex = Regex::new(&format!(r"^{}$", pattern)).unwrap();
+    pub fn check_flag(&self, re: &Regex) -> bool {
+        let compiled_pattern: &Regex = &re;
         compiled_pattern.is_match(&self.value)
     }
 
     pub fn is_hashtag(&self) -> bool {
-        !self.check_flag(*NOT_A_HASHTAG) & self.check_flag(*HASHTAG)
+        !self.check_flag(&NOT_A_HASHTAG_RE) & self.check_flag(&HASHTAG_RE)
     }
 
     pub fn is_url(&self) -> bool {
-        self.check_flag(*URL)
+        self.check_flag(&URL_RE)
     }
 
     pub fn is_mention(&self) -> bool {
-        self.check_flag(*MENTION)
+        self.check_flag(&MENTION_RE)
     }
 
     pub fn is_digit(&self) -> bool {
-        self.check_flag(*DIGIT)
+        self.check_flag(&DIGIT_RE)
     }
 
     pub fn is_email(&self) -> bool {
-        self.check_flag(*EMAIL)
+        self.check_flag(&EMAIL_RE)
     }
 
     pub fn is_html_tag(&self) -> bool {
-        self.check_flag(*HTML_TAG)
+        self.check_flag(&HTML_TAG_RE)
     }
 
     pub fn do_action(&mut self, action: &Action) -> bool {
@@ -221,7 +223,7 @@ impl WeiboToken {
     }
 
     pub fn is_hashtag(&self) -> bool {
-        self.token.check_flag(*WEIBO_HASHTAG)
+        self.token.check_flag(&WEIBO_HASHTAG_RE)
     }
 
     pub fn is_url(&self) -> bool {
@@ -334,9 +336,9 @@ mod tests {
     #[test]
     fn test_token_check_flag() {
         let mut token = Token {value: "#hashtag".to_owned()};
-        assert!(token.check_flag(*HASHTAG));
+        assert!(token.check_flag(&HASHTAG_RE));
         let mut token = Token {value: "not_hashtag".to_owned()};
-        assert!(!token.check_flag(*HASHTAG))
+        assert!(!token.check_flag(&HASHTAG_RE))
     }
 
     #[test]

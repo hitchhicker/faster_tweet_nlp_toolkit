@@ -11,5 +11,7 @@ mod text_parser;
 fn faster_tweet_nlp_toolkit(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<token::PyToken>()?;
     m.add_class::<text_parser::PyParsedText>()?;
+    m.add_function(wrap_pyfunction!(text_parser::parse_text, m)?)?;
+    m.add_function(wrap_pyfunction!(text_parser::preprocess_text, m)?)?;
     Ok(())
 }
