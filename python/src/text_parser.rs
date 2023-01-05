@@ -5,6 +5,7 @@ use ftnt::{text_parser::{ParsedText, _parse_text}, token::{Action, Token}, token
 use ftnt::text_parser::parse_text as parse_text_rust;
 use ftnt::text_parser::preprocess_text as preprocess_text_rust;
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 use regex::Regex;
 use itertools::Itertools;
 
@@ -42,84 +43,46 @@ impl PyParsedText {
         emails_action: Option<&str>,
         html_tags_action: Option<&str>,
     ) -> () {
-        for token in &mut self.parsed_text.tokens {
-            for action in [
-                &Action{action_name: mentions_action.map(|s| s.to_string()), action_condition: "is_mention".to_owned()},
-                &Action{action_name: hashtags_action.map(|s| s.to_string()), action_condition: "is_hashtag".to_owned()},
-                &Action{action_name: urls_action.map(|s| s.to_string()), action_condition: "is_url".to_owned()},
-                &Action{action_name: digits_action.map(|s| s.to_string()), action_condition: "is_digit".to_owned()},
-                &Action{action_name: emojis_action.map(|s| s.to_string()), action_condition: "is_emoji".to_owned()},
-                &Action{action_name: puncts_action.map(|s| s.to_string()), action_condition: "is_punct".to_owned()},
-                &Action{action_name: emails_action.map(|s| s.to_string()), action_condition: "is_email".to_owned()},
-                &Action{action_name: html_tags_action.map(|s| s.to_string()), action_condition: "is_html_tag".to_owned()},
-            ] {
-                if token.do_action(action) {
-                    break;
-                }
-            }
-        }
-        self.parsed_text.tokens = self.parsed_text.tokens
-        .iter()
-        .filter(|token| token.value.len() > 0)
-        .map(|x| Token{ value: (*x.value).to_string()})
-        .collect::<Vec<_>>()
+        return self.parsed_text.process(mentions_action, hashtags_action, urls_action, digits_action, emojis_action, puncts_action, emails_action, html_tags_action)
     }
 
     pub fn post_process(&mut self) -> () {
-        let text = self.value();
-        let re = Regex::new(r"\s+").unwrap();
-        let result = re.replace_all(text, " ");
-        self.parsed_text.value = Some(result.trim().to_string());
+        return self.parsed_text.post_process()
     }
 
     #[getter]
     pub fn value(&mut self) -> &str {
-        if self.parsed_text.value.is_none() {
-            self.parsed_text.value = Some(String::from(self.parsed_text.tokens.iter().join(&self.parsed_text.split)))
-        }
-        return &self.parsed_text.value.as_ref().unwrap()
+        return self.parsed_text.value()
     }
 
     #[getter]
     pub fn hashtags(&self) -> Vec<&str> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_hashtag()).map(
-                |x| x.value.strip_prefix("#").unwrap()).collect::<Vec<&str>>()
+        return self.parsed_text.hashtags()
     }
 
     #[getter]
     pub fn mentions(&self) -> Vec<String> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_mention()).map(
-                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.parsed_text.mentions()
     }
 
     #[getter]
     pub fn emojis(&self) -> Vec<String> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_emoji()).map(
-                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.parsed_text.emojis()
     }
 
     #[getter]
     pub fn digits(&self) -> Vec<String> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_digit()).map(
-                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.parsed_text.digits()
     }
 
     #[getter]
     pub fn emails(&self) -> Vec<String> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_email()).map(
-                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.parsed_text.emails()
     }
 
     #[getter]
     pub fn urls(&self) -> Vec<String> {
-        return self.parsed_text.tokens.iter().filter(
-            |token| token.is_url()).map(
-                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.parsed_text.urls()
     }
 }
 

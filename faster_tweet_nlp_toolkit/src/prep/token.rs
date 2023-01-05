@@ -87,8 +87,7 @@ impl Token{
     }
 
     pub fn check_flag(&self, re: &Regex) -> bool {
-        let compiled_pattern: &Regex = &re;
-        compiled_pattern.is_match(&self.value)
+        re.is_match(&self.value)
     }
 
     pub fn is_hashtag(&self) -> bool {

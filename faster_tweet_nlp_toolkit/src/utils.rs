@@ -5,7 +5,7 @@ use crate::constants::VARIATION_SELECTORS;
 
 pub fn strip_accents_unicode(text: &str) -> String {
     let normlized_text = UnicodeNormalization::nfd(text).collect::<String>();
-    let mut output: String = String::new();
+    let mut output: String = String::with_capacity(text.len());
     for ch in normlized_text.chars() {
         if !ch.is_mark_nonspacing() {
             output.push(ch);

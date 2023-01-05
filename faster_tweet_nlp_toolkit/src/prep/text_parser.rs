@@ -56,8 +56,7 @@ impl  ParsedText{
 
     pub fn post_process(&mut self) -> () {
         let text = self.value();
-        let re = Regex::new(r"\s+").unwrap();
-        let result = re.replace_all(text, " ");
+        let result = Regex::new(r"\s+").unwrap().replace_all(text, " ");
         self.value = Some(result.trim().to_string());
     }
 
