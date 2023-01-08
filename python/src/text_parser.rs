@@ -6,7 +6,7 @@ use ftnt::text_parser::parse_text as parse_text_rust;
 use ftnt::text_parser::preprocess_text as preprocess_text_rust;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use regex::Regex;
+use pcre2::bytes::Regex;
 use itertools::Itertools;
 
 #[pyclass(module = "faster_tweet_nlp_toolkit", name = "ParsedText")]
@@ -56,7 +56,7 @@ impl PyParsedText {
     }
 
     #[getter]
-    pub fn hashtags(&self) -> Vec<&str> {
+    pub fn hashtags(&self) -> Vec<String> {
         return self.parsed_text.hashtags()
     }
 

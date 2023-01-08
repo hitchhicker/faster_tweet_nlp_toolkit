@@ -3,7 +3,7 @@
 use std::fmt::Display;
 use std::ops::{Index, IndexMut};
 
-use regex::Regex;
+use pcre2::bytes::Regex;
 use crate::prep::regexes::*;
 use crate::constants::*;
 use unicode_categories::UnicodeCategories;
@@ -87,7 +87,7 @@ impl Token{
     }
 
     pub fn check_flag(&self, re: &Regex) -> bool {
-        re.is_match(&self.value)
+        re.is_match(&self.value.as_bytes()).unwrap()
     }
 
     pub fn is_hashtag(&self) -> bool {

@@ -5,7 +5,6 @@ pub mod utils;
 use std::{time::Instant};
 
 use faster_tweet_nlp_toolkit::text_parser::parse_text;
-use regex::Regex;
 
 fn main() {
     let _start = Instant::now();
@@ -41,11 +40,4 @@ fn main() {
     // for mat in emojit_regex.find_iter(":http:") {
     //     println!("{:?}", mat);
     // }
-    let pattern:Regex = Regex::new(r#"([^ ])(https?://)"#).unwrap();
-    let text = "asylum seeker:http://t.co/skU8zM7Slh";
-    for mat in pattern.find_iter(text) {
-        println!("{:?}", mat);
-    }
-    let text2 = String::from(pattern.replace_all(&text, "$1 $2"));
-    println!("{}", text2)
 }

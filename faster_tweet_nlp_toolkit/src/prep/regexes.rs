@@ -6,7 +6,9 @@ and
     https://www.nltk.org/_modules/nltk/tokenize/casual.html#TweetTokenizer
 */
 use lazy_static::lazy_static;
-use regex::Regex;
+use once_cell::sync::Lazy;
+use pcre2::bytes::{RegexBuilder, Regex};
+use std::sync::Mutex;
 
 
 fn string_to_static_str(s: String) -> &'static str {
@@ -14,21 +16,26 @@ fn string_to_static_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
 }
 
+static REGEX_BUILDER: Lazy<Mutex<RegexBuilder>> = Lazy::new(|| {
+    let mut builder: RegexBuilder = RegexBuilder::new();
+    builder.ucp(true);
+    Mutex::new(builder)
+});
+
+
 lazy_static! {
     pub static ref HASHTAG: &'static str = r#"\#\b[\w\-_]+\b"#;
-    pub static ref HASHTAG_RE: Regex = Regex::new(r#"^\#\b[\w\-_]+\b$"#).unwrap();
-
+    pub static ref HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"\#\b[\w\-_]+\b"#).unwrap();
     pub static ref WEIBO_HASHTAG: &'static str = r#"\#[^#]+#"#;
-    pub static ref WEIBO_HASHTAG_RE: Regex = Regex::new(r#"^\#[^#]+#$"#).unwrap();
+    pub static ref WEIBO_HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^\#[^#]+#$"#).unwrap();
 
-    pub static ref NOT_A_HASHTAG: &'static str = r#"\#\b[\d]+\b"#;
-    pub static ref NOT_A_HASHTAG_RE: Regex = Regex::new(r#"^\#\b[\d]+\b$"#).unwrap();
+    pub static ref NOT_A_HASHTAG: &'static str = r#"\#\b[p{N}]+\b"#;
+    pub static ref NOT_A_HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^\#\b[\p{N}]+\b$"#).unwrap();
 
-
-    pub static ref WORD: &'static str = r#"(?:[^\W\d|(?:_](?:[^\W\d_]|['\-_]|[\u0e00-\u0e7f])+[^\W\d_]?)[^\W\d]?"#;
+    pub static ref WORD: &'static str = r#"(?:[^\W\d|(?:_](?:[^\W\d_]|['\-_]|[\x{0E00}-\x{0E7F}])+[^\W\d_]?)[^\W\d]?"#;
 
     pub static ref MENTION:&'static str = r#"@\w+"#;
-    pub static ref MENTION_RE: Regex = Regex::new(r#"^@\w+$"#).unwrap();
+    pub static ref MENTION_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^@\w+$"#).unwrap();
     // pub static ref _LTR_EMOTICON: [&'static str; 5] = [
     //     // optional hat
     //     r#"(?:(?<![a-zA-Z])[DPO]|(?<!\d)[03]|[|}><=])?"#,
@@ -64,41 +71,41 @@ lazy_static! {
     // ];
     // pub static ref EMOTICONS: &'static str = string_to_static_str(_EMOTICONS.map(|x| x.to_string()).join(""));
     pub static ref EMAIL: &'static str = r#"(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)"#;
-    pub static ref EMAIL_RE: Regex = Regex::new(r#"^(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)$"#).unwrap();
+    pub static ref EMAIL_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)$"#).unwrap();
 
     pub static ref URL: &'static str = r#"(?:https?://[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})"#;
-    pub static ref URL_RE: Regex = Regex::new(r#"^(?:https?://[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})$"#).unwrap();
+    pub static ref URL_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^(?:https?://[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})$"#).unwrap();
 
     pub static ref CAMEL_SPLIT: &'static str = r#"((?<=[a-z])[A-Z]|(?<!^)[A-Z](?=[a-z])|[0-9]+|(?<=[0-9\\-\\_])[A-Za-z]|[\\-\\_])"#;
 
     pub static ref HTML_TAG: &'static str = r#"<[^>\s]+>"#;
-    pub static ref HTML_TAG_RE: Regex = Regex::new(r#"^<[^>\s]+>$"#).unwrap();
+    pub static ref HTML_TAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^<[^>\s]+>$"#).unwrap();
 
     pub static ref ASCII_ARROW: &'static str = r#"[\-]+>|<[\-]+"#;
 
     pub static ref DIGIT: &'static str = r#"(?:[+\-]?\d+[,/.:-]?\d*[+\-]?)"#;
-    pub static ref DIGIT_RE: Regex = Regex::new(r#"^(?:[+\-]?\d+[,/.:-]?\d*[+\-]?)$"#).unwrap();
+    pub static ref DIGIT_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^(?:[+\-]?\d+[,/.:-]?\d*[+\-]?)$"#).unwrap();
 
     pub static ref ELLIPSIS_DOTS: &'static str = r#"(?:\.(?:\s*\.){1,})"#;
     pub static ref EMOJI_STRING: &'static str = r#"(?::\w+:)"#;
 
     // === Patterns ===
-    pub static ref QUOTES_PAT: Regex = Regex::new(r#"[“”«»]"#).unwrap();
-    pub static ref APOSTROPHES_PAT: Regex = Regex::new(r#"[‘’]"#).unwrap();
-    pub static ref URL_PAT: Regex = Regex::new(&URL).unwrap();
-    pub static ref RT_MENTION_PAT: Regex = Regex::new(&(r#"^RT "#.to_string() + &MENTION + &r#": "#.to_string())).unwrap();
+    pub static ref QUOTES_PAT: Regex = REGEX_BUILDER.lock().unwrap().build(r#"[“”«»]"#).unwrap();
+    pub static ref APOSTROPHES_PAT: Regex = REGEX_BUILDER.lock().unwrap().build(r#"[‘’]"#).unwrap();
+    pub static ref URL_PAT: Regex = REGEX_BUILDER.lock().unwrap().build(&URL).unwrap();
+    pub static ref RT_MENTION_PAT: Regex = REGEX_BUILDER.lock().unwrap().build(&(r#"^RT "#.to_string() + &MENTION + &r#": "#.to_string())).unwrap();
 
     // join all together
     static ref _TOKEN_PIPELINE: [&'static str; 11] = [
         &URL, &EMAIL, &MENTION, &HASHTAG, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
     ];
     static ref TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.map(|x| x.to_string()).join(r"|"));
-    pub static ref TWEET_TOKENIZE: Regex = Regex::new(&TOKEN_PIPELINE).unwrap();
+    pub static ref TWEET_TOKENIZE: Regex = REGEX_BUILDER.lock().unwrap().build(&TOKEN_PIPELINE).unwrap();
 
     static ref _WEIBO_TOKEN_PIPELINE: [&'static str; 11] = [
         &URL, &EMAIL, &MENTION, &HASHTAG, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
     ];
     static ref WEIBO_TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.join("|"));
-    pub static ref WEIBO_TOKENIZE: Regex = Regex::new(&TOKEN_PIPELINE).unwrap();
+    pub static ref WEIBO_TOKENIZE: Regex = REGEX_BUILDER.lock().unwrap().build(&TOKEN_PIPELINE).unwrap();
 }
 

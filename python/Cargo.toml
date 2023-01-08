@@ -10,10 +10,15 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.17.1", features = ["extension-module"] }
-regex = "1.6.0"
+regex = "1.7.0"
 emojis = "0.5.0"
 itertools = "0.10.5"
 
 [dependencies.faster_tweet_nlp_toolkit]
 version = "*"
 path = "../faster_tweet_nlp_toolkit"
+
+# Copied from https://github.com/priyankat99/rust-pcre2
+[dependencies.pcre2]
+version = "*"
+path = "../pcre2"
