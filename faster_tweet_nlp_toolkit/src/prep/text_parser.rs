@@ -182,7 +182,7 @@ pub fn preprocess_text(
         text = text.to_lowercase();
     }
     if strip_accents.unwrap_or(false) {
-        text = strip_accents_unicode(&text);
+        text = strip_accents_unicode(&text).to_string();
     }
      if reduce_len.unwrap_or(false) {
         text = reduce_lengthening(&text);

@@ -2,13 +2,17 @@ use crate::prep::token::{Token, WeiboToken};
 use crate::prep::regexes::{TWEET_TOKENIZE, WEIBO_TOKENIZE};
 
 pub fn tweet_tokenize(text: String) -> Vec<Token> {
-    TWEET_TOKENIZE.find_iter(text.as_bytes()).map(
-        |m| Token::new(String::from_utf8(text.as_bytes()[m.as_ref().unwrap().start()..m.as_ref().unwrap().end()].to_vec()).unwrap())).collect()
+    unsafe {
+        TWEET_TOKENIZE.find_iter(&text.as_bytes()).map(
+            |m| Token::new(String::from_utf8_unchecked(m.unwrap().subject().to_vec()))).collect()
+    }
 }
 
 pub fn weibo_tokenize(text: String) -> Vec<WeiboToken> {
-    WEIBO_TOKENIZE.find_iter(text.as_bytes()).map(
-        |m| WeiboToken::new(String::from_utf8(text.as_bytes()[m.as_ref().unwrap().start()..m.as_ref().unwrap().end()].to_vec()).unwrap())).collect()
+    unsafe {
+        WEIBO_TOKENIZE.find_iter(text.as_bytes()).map(
+            |m| WeiboToken::new(String::from_utf8_unchecked(m.unwrap().subject().to_vec()))).collect()
+    }
 }
 
 pub fn white_space_tokenize(text: &str) -> Vec<Token> {
