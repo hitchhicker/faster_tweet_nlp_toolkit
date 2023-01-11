@@ -37,5 +37,5 @@ pub fn prep(
         puncts,
         emails,
         html_tags,
-    ).value.unwrap()
+    ).value().to_string()
 }

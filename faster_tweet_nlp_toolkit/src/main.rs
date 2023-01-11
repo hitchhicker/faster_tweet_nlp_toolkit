@@ -3,7 +3,6 @@ pub mod constants;
 pub mod utils;
 
 use std::{time::Instant};
-
 use faster_tweet_nlp_toolkit::text_parser::parse_text;
 
 fn main() {
