@@ -27,6 +27,7 @@ impl  ParsedText{
         urls_action: Option<&str>,
         digits_action: Option<&str>,
         emojis_action: Option<&str>,
+        emoticons_actions: Option<&str>,
         puncts_action: Option<&str>,
         emails_action: Option<&str>,
         html_tags_action: Option<&str>,
@@ -38,6 +39,7 @@ impl  ParsedText{
                 &Action{action_name: urls_action.map(|s| s.to_string()), action_condition: "is_url".to_owned()},
                 &Action{action_name: digits_action.map(|s| s.to_string()), action_condition: "is_digit".to_owned()},
                 &Action{action_name: emojis_action.map(|s| s.to_string()), action_condition: "is_emoji".to_owned()},
+                &Action{action_name: emoticons_actions.map(|s| s.to_string()), action_condition: "is_emoticon".to_owned()},
                 &Action{action_name: puncts_action.map(|s| s.to_string()), action_condition: "is_punct".to_owned()},
                 &Action{action_name: emails_action.map(|s| s.to_string()), action_condition: "is_email".to_owned()},
                 &Action{action_name: html_tags_action.map(|s| s.to_string()), action_condition: "is_html_tag".to_owned()},
@@ -86,6 +88,12 @@ impl  ParsedText{
                 |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
     }
 
+    pub fn emoticons(&self) -> Vec<String> {
+        return self.tokens.iter().filter(
+            |token| token.is_emoticon()).map(
+                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+    }
+
     pub fn digits(&self) -> Vec<String> {
         return self.tokens.iter().filter(
             |token| token.is_digit()).map(
@@ -123,6 +131,7 @@ pub fn _parse_text(
     tokenizer: Option<fn(String) -> Vec<Token>>,
     filters: Option<HashSet<&str>>,
     emojis: Option<&str>,
+    emoticons_actions: Option<&str>,
     mentions: Option<&str>,
     hashtags: Option<&str>,
     urls: Option<&str>,
@@ -147,6 +156,7 @@ pub fn _parse_text(
         urls,
         digits,
         emojis,
+        emoticons_actions,
         puncts,
         emails,
         html_tags,
@@ -215,6 +225,7 @@ pub fn parse_text(
     tokenizer: Option<fn(String) -> Vec<Token>>,
     filters: Option<HashSet<&str>>,
     emojis: Option<&str>,
+    emoticons: Option<&str>,
     mentions: Option<&str>,
     hashtags: Option<&str>,
     urls: Option<&str>,
@@ -224,7 +235,7 @@ pub fn parse_text(
     html_tags: Option<&str>,
 ) -> ParsedText{
     let clean_text = preprocess_text(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len);
-    _parse_text(clean_text, tokenizer, filters, emojis, mentions, hashtags, urls, digits, puncts, emails, html_tags)
+    _parse_text(clean_text, tokenizer, filters, emojis, emoticons, mentions, hashtags, urls, digits, puncts, emails, html_tags)
 }
 
 pub fn reduce_lengthening(text: &str) -> String {
@@ -259,6 +270,7 @@ mod tests {
                 Token {value: String::from("season")},
                 Token {value: String::from("of")},
                 Token {value: String::from("tutu@gmail.com")},
+                Token {value: String::from(r"\(^o^)/")},
                 Token {value: String::from("123")},
                 Token {value: String::from("!")},
                 Token {value: String::from("#davidlynch")},
@@ -270,14 +282,15 @@ mod tests {
     #[test]
     fn test_text_parser_mentions() {
         let mut parsed_text = _get_mock_parsed_text();
-        assert_eq!(parsed_text.value(), "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries");
+        assert_eq!(parsed_text.value(), r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries");
         assert_eq!(parsed_text.mentions(), vec![String::from("@nlp")]);
         assert_eq!(parsed_text.emojis(), vec![String::from("😰")]);
+        assert_eq!(parsed_text.emoticons(), vec![String::from(r"\(^o^)/")]);
         assert_eq!(parsed_text.digits(), vec![String::from("123")]);
         assert_eq!(parsed_text.emails(), vec![String::from("tutu@gmail.com")]);
         // assert_eq!(parsed_text.hashtags(), vec![String::from("davidlynch"), String::from("tvseries")]);
         assert_eq!(parsed_text.urls(), vec![String::from("https://www.google.fr")]);
-        assert_eq!(parsed_text.len(), 18);
+        assert_eq!(parsed_text.len(), 19);
 
         // test get value by index and set value by index
         assert_eq!(parsed_text[1].value, "c'est");
@@ -285,9 +298,9 @@ mod tests {
         assert_eq!(parsed_text[1].value, "cest");
 
         // test post-processing
-        parsed_text.value = Some(" <p> c'est </p> @nlp     https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries".to_owned());
+        parsed_text.value = Some(r" <p> c'est </p> @nlp     https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries".to_owned());
         parsed_text.post_process();
-        assert_eq!(parsed_text.value(), "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries");
+        assert_eq!(parsed_text.value(), r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries");
 
     }
 
@@ -303,6 +316,7 @@ mod tests {
             None,
             None,
             Some("remove"),
+            None,
             Some("remove"),
             None,
             None,
@@ -320,6 +334,7 @@ mod tests {
     fn test_text_parser_with_attached_url(#[case] url_action: &str, #[case] expected: &str) {
         let mut parsed_text = parse_text(
             String::from("asylum seeker:http://t.co/skU8zM7Slh"),
+            None,
             None,
             None,
             None,
@@ -358,6 +373,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         );
         assert_eq!(parsed_text.value(), "@abc 😂 #hashtag");
     }
@@ -381,31 +397,35 @@ mod tests {
             None,
             None,
             None,
+            None,
         );
         assert_eq!(parsed_text.value(), "@abc :joy: #hashtag");
     }
 
     #[rstest]
-    #[case(None, None, None, None, None, None, None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(Some("tag"), None, None, None, None, None, None, None, "<p> c'est </p> <MENTION> https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(Some("remove"), None, None, None, None, None, None, None, "<p> c'est </p> https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, Some("tag"), None, None, None, None, None, "<p> c'est </p> @nlp <URL> cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, Some("remove"), None, None, None, None, None, "<p> c'est </p> @nlp cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, Some("tag"), None, None, None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com <DIGIT> ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, Some("tag"), None, None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait <EMOJI> for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, Some("remove") , None, None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, Some("demojize"), None, None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait :cold_sweat: for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, None, Some("tag"), None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 <PUNCT> #davidlynch #tvseries")]
-    #[case(None, None, None, None, None, Some("remove"), None, None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 #davidlynch #tvseries")]
-    #[case(None, None, None, None, None, None, Some("tag"), None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of <EMAIL> 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, None, None, Some("remove"), None, "<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of 123 ! #davidlynch #tvseries")]
-    #[case(None, None, None, None, None, None, None, Some("remove"), "c'est @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None, None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(Some("tag"), None, None, None, None, None, None, None, None, r"<p> c'est </p> <MENTION> https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(Some("remove"), None, None, None, None, None, None, None, None, r"<p> c'est </p> https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, Some("tag"), None, None, None, None, None, None, r"<p> c'est </p> @nlp <URL> cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, Some("remove"), None, None, None, None, None, None, r"<p> c'est </p> @nlp cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, Some("tag"), None, None, None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ <DIGIT> ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, Some("tag"), None, None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait <EMOJI> for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, Some("remove") , None, None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, Some("demojize"), None, None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait :cold_sweat: for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, Some("tag"), None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com <EMOTICON> 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, Some("remove"), None, None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None, Some("tag"), None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 <PUNCT> #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None, Some("remove"), None, None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None, None, Some("tag"), None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of <EMAIL> \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None,  None, Some("remove"), None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of \(^o^)/ 123 ! #davidlynch #tvseries")]
+    #[case(None, None, None, None, None, None, None, None, Some("remove"), r"c'est @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
     fn test_text_parser_post_process(
         #[case] mentions_action: Option<&str>,
         #[case] hashtags_action: Option<&str>,
         #[case] urls_action: Option<&str>,
         #[case] digits_action: Option<&str>,
         #[case] emojis_action: Option<&str>,
+        #[case] emoticons_action: Option<&str>,
         #[case] puncts_action: Option<&str>,
         #[case] emails_action: Option<&str>,
         #[case] html_tags_action: Option<&str>,
@@ -418,6 +438,7 @@ mod tests {
             urls_action,
             digits_action,
             emojis_action,
+            emoticons_action,
             puncts_action,
             emails_action,
             html_tags_action,

@@ -15,6 +15,7 @@ pub fn prep(
     reduce_len: Option<bool>,
     filters: Option<HashSet<&str>>,
     emojis: Option<&str>,
+    emoticons: Option<&str>,
     mentions: Option<&str>,
     hashtags: Option<&str>,
     urls: Option<&str>,
@@ -23,5 +24,5 @@ pub fn prep(
     emails: Option<&str>,
     html_tags: Option<&str>,
 )-> String {
-    prep_rust(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len, Some(tweet_tokenize), filters, emojis, mentions, hashtags, urls, digits, puncts, emails, html_tags)
+    prep_rust(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len, Some(tweet_tokenize), filters, emojis, emoticons, mentions, hashtags, urls, digits, puncts, emails, html_tags)
 }

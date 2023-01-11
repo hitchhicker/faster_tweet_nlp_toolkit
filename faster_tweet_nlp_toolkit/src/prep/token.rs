@@ -114,6 +114,10 @@ impl Token{
         self.check_flag(&HTML_TAG_RE)
     }
 
+    pub fn is_emoticon(&self) -> bool {
+        self.check_flag(&EMOTICONS_RE)
+    }
+
     pub fn do_action(&mut self, action: &Action) -> bool {
         action.apply(self)
     }
@@ -180,6 +184,7 @@ impl Action{
             "is_url" => token.is_url(),
             "is_digit" => token.is_digit(),
             "is_emoji" => token.is_emoji(),
+            "is_emoticon" => token.is_emoticon(),
             "is_punct" => token.is_punct(),
             "is_email" => token.is_email(),
             "is_html_tag" => token.is_html_tag(),
@@ -438,5 +443,13 @@ mod tests {
     fn test_is_weibo_hashtag(#[case] value: &str, #[case] expected: bool) {
         let mut weibo_token = WeiboToken::new(String::from(value));
         assert_eq!(expected, weibo_token.is_hashtag())
+    }
+
+    #[rstest]
+    #[case(":)", true)]
+    #[case("(◕‿◕✿)", true)]
+    fn test_is_emoticon(#[case] value: &str, #[case] expected: bool) {
+        let mut token = Token {value: value.to_owned()};
+        assert_eq!(expected, token.is_emoticon())
     }
 }

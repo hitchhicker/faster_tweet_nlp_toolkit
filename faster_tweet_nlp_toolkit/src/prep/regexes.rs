@@ -36,40 +36,43 @@ lazy_static! {
 
     pub static ref MENTION:&'static str = r#"@\w+"#;
     pub static ref MENTION_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^@\w+$"#).unwrap();
-    // pub static ref _LTR_EMOTICON: [&'static str; 5] = [
-    //     // optional hat
-    //     r#"(?:(?<![a-zA-Z])[DPO]|(?<!\d)[03]|[|}><=])?"#,
-    //     // eyes
-    //     r#"(?:(?<![a-zA-Z\(])[xXB](?![a-ce-oq-zA-CE-OQ-Z,\.\/])|(?<![:])[:=|](?![\.])|(?<![%#\d])[%#](?![%#\d])|(?<![\d\$])[$](?![\d\.,\$])|[;](?!\()|(?<![\d\(\-\+])8(?![\da-ce-zA-CE-Z\\/])|\*(?![\*\d,.]))"#,
-    //     // pylint: disable=line-too-long
-    //     // optional tears
-    //     r#"(?:['\",])?"#,
-    //     // optional nose
-    //     r#"(?:(?<![\w*])[oc](?![a-zA-Z])|(?:[-‑^]))?"#,
-    //     // mouth
-    //     r#"(?:[(){}\[\]<>|/\\]+|[Þ×þ]|(?<!\d)[30](?!\d)|(?<![\d\*])[*,.@#&](?![\*\d,.])|(?<![\d\$])[$](?![\d\.,\$])|[DOosSJLxXpPbc](?![a-zA-Z]))"#,
-    // ];
-    // pub static ref _RTL_EMOTICON: [&'static str; 7] = [
-    //     r#"(?<![\w])"#,
-    //     r#"(?:[(){}\[\]<>|/\\]+|(?<![\d\.\,])[0](?![\d\.])|(?![\d\*,.@#&])[*,.@#&]|[$]|(?<![a-zA-Z])[DOosSxX])"#,
-    //     // mouth
-    //     r#"(?:[-‑^])?"#,  // optional nose
-    //     r#"(?:['\",])?"#,  // optional tears
-    //     r#"(?:[xX]|[:=|]|[%#]|[$8](?![\d\.])|[;]|\*)"#,  // eyes
-    //     r#"(?:[O]|[0]|[|{><=])?"#,  // optional hat
-    //     r#"(?![a-zA-Z])"#,
-    // ];
-    // static ref _LTR_FACE: &'static str = string_to_static_str(_LTR_EMOTICON.map(|x| x.to_string()).join(""));
-    // static ref _RTL_FACE: &'static str = string_to_static_str(_RTL_EMOTICON.map(|x| x.to_string()).join(""));
-    // static ref _EASTERN_EMOTICONS: &'static str = r#"(?<![\w])(?:(?:[<>]?[\^;][\W_m][\;^][;<>]?)|(?:[^\s()]?m?[\(][\W_oTOJ]{1,3}[\s]?[\W_oTOJ]{1,3}[)]m?[^\s()]?)|(?:\*?[v>\-\/\\][o0O\_\.][v\-<\/\\]\*?)|(?:[oO0>][\-_\/oO\.\\]{1,2}[oO0>])|(?:\^\^))(?![\w])"#;
-    // static ref _REST_EMOTICONS: &'static str = r#"(?<![A-Za-z0-9/()])(?:(?:\^5)|(?:\<3))(?![[A-Za-z0-9/()])"#;
-    // static ref _EMOTICONS: [&'static str; 4] = [
-    //     &_LTR_FACE,
-    //     &_RTL_FACE,
-    //     &_EASTERN_EMOTICONS,
-    //     &_REST_EMOTICONS,
-    // ];
-    // pub static ref EMOTICONS: &'static str = string_to_static_str(_EMOTICONS.map(|x| x.to_string()).join(""));
+    pub static ref _LTR_EMOTICON: [&'static str; 5] = [
+        // optional hat
+        r#"(?:(?<![a-zA-Z])[DPO]|(?<!\d)[03]|[|}><=])?"#,
+        // eyes
+        r#"(?:(?<![a-zA-Z\(])[xXB](?![a-ce-oq-zA-CE-OQ-Z,\.\/])|(?<![:])[:=|](?![\.])|(?<![%#\d])[%#](?![%#\d])|(?<![\d\$])[$](?![\d\.,\$])|[;](?!\()|(?<![\d\(\-\+])8(?![\da-ce-zA-CE-Z\\/])|\*(?![\*\d,.]))"#,
+        // pylint: disable=line-too-long
+        // optional tears
+        r#"(?:['\",])?"#,
+        // optional nose
+        r#"(?:(?<![\w*])[oc](?![a-zA-Z])|(?:[-‑^]))?"#,
+        // mouth
+        r#"(?:[(){}\[\]<>|/\\]+|[Þ×þ]|(?<!\d)[30](?!\d)|(?<![\d\*])[*,.@#&](?![\*\d,.])|(?<![\d\$])[$](?![\d\.,\$])|[DOosSJLxXpPbc](?![a-zA-Z]))"#,
+    ];
+    pub static ref _RTL_EMOTICON: [&'static str; 7] = [
+        r#"(?<![\w])"#,
+        r#"(?:[(){}\[\]<>|/\\]+|(?<![\d\.\,])[0](?![\d\.])|(?![\d\*,.@#&])[*,.@#&]|[$]|(?<![a-zA-Z])[DOosSxX])"#,
+        // mouth
+        r#"(?:[-‑^])?"#,  // optional nose
+        r#"(?:['\",])?"#,  // optional tears
+        r#"(?:[xX]|[:=|]|[%#]|[$8](?![\d\.])|[;]|\*)"#,  // eyes
+        r#"(?:[O]|[0]|[|{><=])?"#,  // optional hat
+        r#"(?![a-zA-Z])"#,
+    ];
+    static ref _LTR_FACE: &'static str = string_to_static_str(_LTR_EMOTICON.map(|x| x.to_string()).join(""));
+    static ref _RTL_FACE: &'static str = string_to_static_str(_RTL_EMOTICON.map(|x| x.to_string()).join(""));
+    static ref _EASTERN_EMOTICONS: &'static str = r#"(?<![\w])(?:(?:[<>]?[\^;][\W_m][\;^][;<>]?)|(?:[^\s()]?m?[\(][\W_oTOJ]{1,3}[\s]?[\W_oTOJ]{1,3}[)]m?[^\s()]?)|(?:\*?[v>\-\/\\][o0O\_\.][v\-<\/\\]\*?)|(?:[oO0>][\-_\/oO\.\\]{1,2}[oO0>])|(?:\^\^))(?![\w])"#;
+    static ref _REST_EMOTICONS: &'static str = r#"(?<![A-Za-z0-9/()])(?:(?:\^5)|(?:\<3))(?![[A-Za-z0-9/()])"#;
+    static ref _EMOTICONS: [&'static str; 4] = [
+        &_LTR_FACE,
+        &_RTL_FACE,
+        &_EASTERN_EMOTICONS,
+        &_REST_EMOTICONS,
+    ];
+    pub static ref EMOTICONS: String = _EMOTICONS.map(|x| x.to_string()).join("|");
+
+    pub static ref EMOTICONS_RE: Regex = REGEX_BUILDER.lock().unwrap().build(format!(r#"^{}$"#, *EMOTICONS).as_str()).unwrap();
+
     pub static ref EMAIL: &'static str = r#"(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)"#;
     pub static ref EMAIL_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^(?:^|)(?:[\w+-](?:\.)?)*?[\w+-]@(?:\w-?)*?\w+(?:\.(?:[a-z]{2,})){1,3}(?:$|)$"#).unwrap();
 

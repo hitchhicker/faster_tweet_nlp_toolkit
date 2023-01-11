@@ -31,7 +31,7 @@ impl PyParsedText {
         Ok(self.parsed_text.tokens.len())
     }
 
-    #[pyo3(text_signature = "(self, mentions_action, hashtags_action, urls_action, digits_action, emojis_action, puncts_action, emails_action, html_tags_action)")]
+    #[pyo3(text_signature = "(self, mentions_action, hashtags_action, urls_action, digits_action, emojis_action, emoticons_action, puncts_action, emails_action, html_tags_action)")]
     pub fn process(
         &mut self,
         mentions_action: Option<&str>,
@@ -39,11 +39,12 @@ impl PyParsedText {
         urls_action: Option<&str>,
         digits_action: Option<&str>,
         emojis_action: Option<&str>,
+        emoticons_action: Option<&str>,
         puncts_action: Option<&str>,
         emails_action: Option<&str>,
         html_tags_action: Option<&str>,
     ) -> () {
-        return self.parsed_text.process(mentions_action, hashtags_action, urls_action, digits_action, emojis_action, puncts_action, emails_action, html_tags_action)
+        return self.parsed_text.process(mentions_action, hashtags_action, urls_action, digits_action, emojis_action, emoticons_action, puncts_action, emails_action, html_tags_action)
     }
 
     pub fn post_process(&mut self) -> () {
@@ -87,7 +88,7 @@ impl PyParsedText {
 }
 
 #[pyfunction]
-#[pyo3(text_signature="(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len, filters, emojis, mentions, hashtags, urls, digits, puncts, emails, html_tags)")]
+#[pyo3(text_signature="(text, encoding, remove_unencodable_char, to_lower, strip_accents, reduce_len, filters, emojis, emoticons, mentions, hashtags, urls, digits, puncts, emails, html_tags)")]
 pub fn parse_text(
     text: String,
     encoding: Option<&str>,
@@ -97,6 +98,7 @@ pub fn parse_text(
     reduce_len: Option<bool>,
     filters: Option<HashSet<&str>>,
     emojis: Option<&str>,
+    emoticons: Option<&str>,
     mentions: Option<&str>,
     hashtags: Option<&str>,
     urls: Option<&str>,
@@ -115,6 +117,7 @@ pub fn parse_text(
         Some(tweet_tokenize),
         filters,
         emojis,
+        emoticons,
         mentions,
         hashtags,
         urls,
