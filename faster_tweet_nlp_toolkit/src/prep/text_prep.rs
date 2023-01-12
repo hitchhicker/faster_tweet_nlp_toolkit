@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use super::{text_parser::parse_text, token::Token};
 
+// TODO: reduce_len and emojis actions do not work !!!
 pub fn prep(
     text: String,
     encoding: Option<&str>,

@@ -16,6 +16,12 @@ impl From<Token> for PyToken {
     }
 }
 
+impl From<PyToken> for Token {
+    fn from(token: PyToken) -> Self {
+        token.token
+    }
+}
+
 #[pymethods]
 impl PyToken {
     #[new]
@@ -26,6 +32,14 @@ impl PyToken {
     #[pyo3(text_signature = "(self, new_value)")]
     pub fn set_value(&mut self, new_value: String) {
         self.token.set_value(new_value)
+    }
+
+    fn __str__(&self) -> PyResult<String>   {
+        Ok(format!("{}", self.token.value))
+    }
+
+    fn __repr__(&self) -> PyResult<String>   {
+        self.__str__()
     }
 
     pub fn __len__(&self) -> PyResult<usize> {

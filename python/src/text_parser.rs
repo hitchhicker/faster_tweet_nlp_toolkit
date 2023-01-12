@@ -9,6 +9,8 @@ use pyo3::types::PyList;
 use pcre2::bytes::Regex;
 use itertools::Itertools;
 
+use crate::token::PyToken;
+
 #[pyclass(module = "faster_tweet_nlp_toolkit", name = "ParsedText")]
 #[derive(PartialEq, Eq, Hash, Debug)]
 pub struct PyParsedText {
@@ -22,13 +24,21 @@ impl From<ParsedText> for PyParsedText {
 
 #[pymethods]
 impl PyParsedText {
-    #[getter]
-    fn tokens(&self) -> PyResult<Vec<String>> {
-        Ok(self.parsed_text.tokens.iter().map(|x|x.to_string()).collect())
+    fn __str__(&mut self) -> PyResult<String>   {
+        Ok(format!("{}", self.parsed_text.value()))
     }
 
-    pub fn __len__(&self) -> PyResult<usize> {
-        Ok(self.parsed_text.tokens.len())
+    fn __repr__(&mut self) -> PyResult<String>   {
+        self.__str__()
+    }
+
+    #[getter]
+    fn tokens(&self) -> Vec<PyToken> {
+        self.parsed_text.tokens.iter().map(|x| PyToken::from(x.clone())).collect()
+    }
+
+    pub fn __len__(&mut self) -> PyResult<usize> {
+        Ok(self.parsed_text.value().len())
     }
 
     #[pyo3(text_signature = "(self, mentions_action, hashtags_action, urls_action, digits_action, emojis_action, emoticons_action, puncts_action, emails_action, html_tags_action)")]

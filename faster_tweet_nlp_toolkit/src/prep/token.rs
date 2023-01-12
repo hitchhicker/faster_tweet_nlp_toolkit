@@ -65,7 +65,7 @@ Error:
 
 // impl IndexMut<usize> for Token {
 //     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-//         &mut self.value.chars().nth(i)
+//         &mut self.value.chars().nth(i).unwrap()
 //     }
 // }
 
