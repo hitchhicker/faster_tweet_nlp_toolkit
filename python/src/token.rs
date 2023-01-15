@@ -42,8 +42,12 @@ impl PyToken {
         self.__str__()
     }
 
-    pub fn __len__(&self) -> PyResult<usize> {
+    fn __len__(&self) -> PyResult<usize> {
         Ok(self.token.value.len())
+    }
+
+    fn __getitem__(&mut self, idx: usize) -> PyResult<String> {
+        Ok(self.token.index_at(idx).to_string())
     }
 
     pub fn is_punct(&self) -> bool {

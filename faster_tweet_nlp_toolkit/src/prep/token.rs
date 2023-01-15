@@ -78,6 +78,10 @@ impl Token{
         self.value = new_value;
     }
 
+    pub fn index_at(&mut self, i: usize) -> char {
+        self.value.chars().nth(i).unwrap()
+    }
+
     pub fn is_emoji(&self) -> bool {
         _is_unicode_emoji(&self.value) || _is_emoji_alias(&self.value)
     }
