@@ -9,9 +9,7 @@ name = "faster_tweet_nlp_toolkit"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.17.1", features = ["extension-module"] }
-emojis = "0.5.2"
-itertools = "0.10.5"
+pyo3 = { version = "0.17.3", features = ["extension-module"] }
 
 [dependencies.faster_tweet_nlp_toolkit]
 version = "*"

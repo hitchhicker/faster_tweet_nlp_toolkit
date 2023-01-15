@@ -1,9 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use ftnt::{prep::token::*, constants::{REPLACE_MAPPINGS, ACTION_MAPPING}, regexes::WEIBO_HASHTAG_RE};
+use ftnt::{prep::token::*, regexes::WEIBO_HASHTAG_RE};
 use pyo3::prelude::*;
-
-use emojis;
 
 #[pyclass(module = "faster_tweet_nlp_toolkit", name = "Token")]
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]

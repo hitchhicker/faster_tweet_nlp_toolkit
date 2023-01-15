@@ -7,7 +7,6 @@ use ftnt::text_parser::preprocess_text as preprocess_text_rust;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 use pcre2::bytes::Regex;
-use itertools::Itertools;
 
 use crate::token::PyToken;
 
