@@ -113,75 +113,26 @@ impl PyAction {
 
     #[pyo3(text_signature = "(self, token)")]
     fn tag(&self, token: &mut PyToken) -> () {
-        token.set_value(match REPLACE_MAPPINGS.get(&self.action.action_condition as &str) {
-            Some(tag) => tag.to_string(),
-            None => token.token.value.to_string()
-        })
+        self.action.tag(&mut token.token)
     }
 
     #[pyo3(text_signature = "(self, token)")]
     fn demojize(&self, token: &mut PyToken) -> () {
-        token.set_value(match emojis::get(&token.token.value) {
-            Some(demoji) => format!(":{}:", demoji.shortcode().unwrap_or(&token.token.value)),
-            _ => format!(":{}:", &token.token.value)
-        })
+        self.action.demojize(&mut token.token)
     }
 
     #[pyo3(text_signature = "(self, token)")]
     fn emojize(&self, token: &mut PyToken) -> () {
-        token.set_value(match emojis::get_by_shortcode(&token.token.value[1..token.token.value.len()-1]) {
-            Some(_emoji) => _emoji.to_string(),
-            _ => token.token.value.to_string(),
-        })
+        self.action.emojize(&mut token.token)
     }
 
     fn is_action_valid(&self) -> bool {
-        if let Some(action_name) = &self.action.action_name {
-            if action_name.len() == 0 {
-                return false
-            }
-            if let Some(actions) = ACTION_MAPPING.get(&self.action.action_condition as &str) {
-                if !actions.contains(&&action_name.as_str()) {
-                    panic!(
-                        r#"Unknown action {action_name}, expected {expected_actions}"#,
-                        action_name=self.action.action_name.as_deref().unwrap_or_default(), expected_actions=
-                        ACTION_MAPPING.get(&self.action.action_condition as &str).unwrap().join(",")
-                    );
-                } else {
-                    return true
-                }
-            }
-        }
-        false
+        self.action.is_action_valid()
     }
 
     #[pyo3(text_signature = "(self, token)")]
     pub fn apply(&self, token: &mut PyToken) -> bool {
-        if !self.is_action_valid() {
-            return false
-        }
-        let is_condition_matched = match self.action.action_condition.as_str() {
-            "is_mention" => token.is_mention(),
-            "is_hashtag" => token.is_hashtag(),
-            "is_url" => token.is_url(),
-            "is_digit" => token.is_digit(),
-            "is_emoji" => token.is_emoji(),
-            "is_punct" => token.is_punct(),
-            "is_email" => token.is_email(),
-            "is_html_tag" => token.is_html_tag(),
-            &_ => false
-        };
-        if !is_condition_matched {
-            return false
-        }
-        match self.action.action_name.as_deref() {
-            Some("remove") => self.remove(token),
-            Some("tag") => self.tag(token),
-            Some("demojize") => self.demojize(token),
-            Some("emojize") => self.emojize(token),
-            _ => return false,
-        }
-        return true
+        self.action.apply(&mut token.token)
     }
 }
 

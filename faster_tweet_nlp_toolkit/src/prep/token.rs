@@ -29,7 +29,7 @@ fn _is_punct(value: &str) -> bool {
 }
 
 fn _is_emoji_alias(value: &str) -> bool {
-    if (! (value.starts_with(":") && value.ends_with(":"))) {
+    if (value.len() <= 2 || ! (value.starts_with(":") && value.ends_with(":"))) {
         return false
     }
     let emoji_opt = emojis::get_by_shortcode(&value[1..value.len()-1]);
@@ -133,32 +133,37 @@ pub struct Action {
 }
 
 impl Action{
-    fn remove(&self, token: &mut Token) -> () {
+    pub fn remove(&self, token: &mut Token) -> () {
         token.set_value("".to_string())
     }
 
-    fn tag(&self, token: &mut Token) -> () {
+    pub fn tag(&self, token: &mut Token) -> () {
         token.set_value(match REPLACE_MAPPINGS.get(&self.action_condition as &str) {
             Some(tag) => tag.to_string(),
             None => token.value.to_string()
         })
     }
 
-    fn demojize(&self, token: &mut Token) -> () {
+    pub fn demojize(&self, token: &mut Token) -> () {
         token.set_value(match emojis::get(&token.value) {
             Some(demoji) => format!(":{}:", demoji.shortcode().unwrap_or(&token.value)),
             _ => format!(":{}:", &token.value)
         })
     }
 
-    fn emojize(&self, token: &mut Token) -> () {
-        token.set_value(match emojis::get_by_shortcode(&token.value[1..token.value.len()-1]) {
-            Some(_emoji) => _emoji.to_string(),
-            _ => token.value.to_string(),
-        })
+    pub fn emojize(&self, token: &mut Token) -> () {
+        if (token.value.len() <= 2) {
+            // expect to have at least two ":"s, e.g., ":joy:"
+            token.value.to_string();
+        } else {
+            token.set_value(match emojis::get_by_shortcode(&token.value[1..token.value.len()-1]) {
+                Some(_emoji) => _emoji.to_string(),
+                _ => token.value.to_string(),
+            })
+        }
     }
 
-    fn is_action_valid(&self) -> bool {
+    pub fn is_action_valid(&self) -> bool {
         if let Some(action_name) = &self.action_name {
             if action_name.len() == 0 {
                 return false
