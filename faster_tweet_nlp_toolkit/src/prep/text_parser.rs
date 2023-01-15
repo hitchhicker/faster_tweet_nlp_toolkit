@@ -2,7 +2,7 @@
 use std::{ops::{Index, IndexMut}, collections::HashSet, borrow::Borrow, char::REPLACEMENT_CHARACTER};
 use itertools::Itertools;
 use lazy_static::{__Deref, lazy_static};
-use pcre2::bytes::Regex;
+use pcre2::bytes::{Regex, Match};
 use encoding_rs::{self, REPLACEMENT};
 
 use crate::{prep::token::{Token, Action}, utils::{strip_accents_unicode, remove_variation_selectors}};
@@ -240,10 +240,17 @@ pub fn parse_text(
 
 pub fn reduce_lengthening(text: &str) -> String {
     lazy_static! {
-        static ref LENGTHENING_RE: Regex = Regex::new(r#"(?:P<x>.)\1{2,3}"#).unwrap();
+        static ref LENGTHENING_RE: Regex = Regex::new(r#"(.)\1{2,}"#).unwrap();
     }
     let pattern: &Regex = &LENGTHENING_RE;
-    String::from_utf8(pattern.replace_all(text.as_bytes(), "$x".as_bytes()).to_vec()).unwrap()
+    let mut res: String = text.to_string().clone();
+    for result in pattern.captures_iter(&text.as_bytes()) {
+        let captures = &result.unwrap();
+        let replace_from = &text[captures.get(0).unwrap().start()..captures.get(0).unwrap().end()];
+        let replace_to = &text[captures.get(1).unwrap().start()..captures.get(1).unwrap().end()].repeat(3);
+        res = res.replace(replace_from, replace_to);
+    }
+    res.to_string()
 }
 
 #[cfg(test)]
@@ -445,7 +452,11 @@ mod tests {
         );
         assert_eq!(parsed_text.value(), expected_value);
     }
-
+    #[rstest]
+    #[case("This is waaaaayyyy too much for you!!!!!!", "This is waaayyy too much for you!!!")]
+    fn test_reduce_lengthening(#[case] text: &str, #[case] expected: &str) {
+        assert_eq!(reduce_lengthening(text), expected);
+    }
     // TODO: support weibo_tokenize
     // #[test]
     // fn test_text_parser_with_weibo_token_class() {

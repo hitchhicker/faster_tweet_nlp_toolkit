@@ -10,7 +10,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.17.1", features = ["extension-module"] }
-regex = "1.7.0"
 emojis = "0.5.0"
 itertools = "0.10.5"
 
