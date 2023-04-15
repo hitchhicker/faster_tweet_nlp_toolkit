@@ -13,13 +13,13 @@ path = "src/lib.rs"
 lazy_static = "1.4.0"
 unicode_categories = "0.1.1"
 emojis = "0.5.2"
-rstest = "0.16.0"
+rstest = "0.17.0"
 itertools = "0.10.5"
 unicode-normalization = "0.1.22"
-encoding_rs = "0.8.31"
+encoding_rs = "0.8.32"
 html-escape = "0.2.13"
-pyo3 = { version = "0.17.1", features = ["extension-module"] }
-once_cell = "1.17.0"
+pyo3 = { version = "0.18.3", features = ["extension-module"] }
+once_cell = "1.17.1"
 
 # Copied from https://github.com/priyankat99/rust-pcre2
 [dependencies.pcre2]
