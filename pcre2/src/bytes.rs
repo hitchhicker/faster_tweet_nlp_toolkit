@@ -14,7 +14,7 @@ use pcre2_sys::{
     PCRE2_UCP, PCRE2_UTF, PCRE2_NO_UTF_CHECK, PCRE2_UNSET,
     PCRE2_NEWLINE_ANYCRLF,
 };
-use thread_local::CachedThreadLocal;
+use thread_local::ThreadLocal;
 
 use crate::error::Error;
 use crate::ffi::{Code, CompileContext, MatchConfig, MatchData};
@@ -224,7 +224,7 @@ impl RegexBuilder {
             code: Arc::new(code),
             capture_names: Arc::new(capture_names),
             capture_names_idx: Arc::new(idx),
-            match_data: CachedThreadLocal::new(),
+            match_data: ThreadLocal::new(),
         })
     }
 
@@ -419,7 +419,7 @@ pub struct Regex {
     /// thread gets its own match data to support using a Regex object from
     /// multiple threads simultaneously. If some match data doesn't exist for
     /// a thread, then a new one is created on demand.
-    match_data: CachedThreadLocal<RefCell<MatchData>>,
+    match_data: ThreadLocal<RefCell<MatchData>>,
 }
 
 impl Clone for Regex {
@@ -430,7 +430,7 @@ impl Clone for Regex {
             code: Arc::clone(&self.code),
             capture_names: Arc::clone(&self.capture_names),
             capture_names_idx: Arc::clone(&self.capture_names_idx),
-            match_data: CachedThreadLocal::new(),
+            match_data: ThreadLocal::new(),
         }
     }
 }
@@ -580,7 +580,7 @@ impl Regex {
                             break;
                         }
                     },
-                    Err(err) => break,
+                    Err(_err) => break,
                 }
                
             }
@@ -608,7 +608,7 @@ impl Regex {
                         break;
                     }
                 },
-                Err(err) => break,
+                Err(_err) => break,
             } 
         }
         new.extend_from_slice(&text[last_match..]);
