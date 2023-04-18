@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
+
 use ftnt::{prep::token::*, regexes::WEIBO_HASHTAG_RE};
 use pyo3::prelude::*;
+use core::iter::Iterator;
 
 #[pyclass(module = "faster_tweet_nlp_toolkit", name = "Token")]
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
@@ -20,20 +22,75 @@ impl From<PyToken> for Token {
     }
 }
 
+#[pyclass]
+struct MyIterator {
+    iter: Box<dyn Iterator<Item = char> + Send>
+}
+
+#[pymethods]
+impl MyIterator {
+    #[allow(clippy::self_named_constructors)]
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf.into()
+    }
+    fn __next__(&mut self) -> Option<char> {
+        self.iter.next()
+    }
+}
+
 #[pymethods]
 impl PyToken {
     #[new]
     pub fn new(value: String) -> PyToken {
         Token::new(value).into()
     }
-    // TODO: add setter
+    // String like operations
+    pub fn __add__(&self, other: String) -> PyResult<String> {
+        Ok(concat_string!(self.token.value, other))
+    }
+
+    pub fn __radd__(&self, other: String) -> PyResult<String> {
+        Ok(concat_string!(other, self.token.value))
+    }
+
+    pub fn __mul_func(&self, val: isize) -> PyResult<String> {
+        if val <= 0 {
+            Ok("".to_string())
+        } else {
+            Ok(self.token.value.repeat(val.try_into().unwrap()))
+        }
+    }
+
+    pub fn __iadd__(&mut self, other: String){
+        self.set_value(self.__add__(other).unwrap())
+    }
+
+    pub fn __imul__(&mut self, val: isize){
+        self.set_value(self.__mul_func(val).unwrap())
+    }
+
+    pub fn __mul__(&self, val: isize) -> PyResult<String> {
+        self.__mul_func(val)
+    }
+
+    pub fn __rmul__(&self, val: isize) -> PyResult<String> {
+        self.__mul_func(val)
+    }
+
+    fn __iter__(&self) -> PyResult<MyIterator> {
+        let iter = MyIterator {
+            iter: Box::new(self.token.value.chars().collect::<Vec<_>>().into_iter()),
+        };
+        Ok(iter)
+    }
+
     #[pyo3(text_signature = "(self, new_value)")]
     pub fn set_value(&mut self, new_value: String) {
         self.token.set_value(new_value)
     }
 
     fn __str__(&self) -> PyResult<String>   {
-        Ok(format!("{}", self.token.value))
+        Ok(format!("\"{}\"", self.token.value))
     }
 
     fn __repr__(&self) -> PyResult<String>   {

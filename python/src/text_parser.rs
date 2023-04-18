@@ -31,6 +31,7 @@ impl PyParsedText {
         self.__str__()
     }
 
+    // TODO: How to modify one token given index without invoking the function set_value?
     #[getter]
     fn tokens(&self) -> Vec<PyToken> {
         self.parsed_text.tokens.iter().map(|x| PyToken::from(x.clone())).collect()

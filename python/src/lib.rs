@@ -1,3 +1,5 @@
+#[macro_use(concat_string)]
+extern crate concat_string;
 extern crate faster_tweet_nlp_toolkit as ftnt;
 use pyo3::prelude::*;
 mod token;
