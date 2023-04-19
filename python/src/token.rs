@@ -61,11 +61,11 @@ impl PyToken {
         }
     }
 
-    pub fn __iadd__(&mut self, other: String){
+    pub fn __iadd__(&mut self, other: String) -> () {
         self.set_value(self.__add__(other).unwrap())
     }
 
-    pub fn __imul__(&mut self, val: isize){
+    pub fn __imul__(&mut self, val: isize) -> () {
         self.set_value(self.__mul_func(val).unwrap())
     }
 
@@ -84,9 +84,14 @@ impl PyToken {
         Ok(iter)
     }
 
-    #[pyo3(text_signature = "(self, new_value)")]
-    pub fn set_value(&mut self, new_value: String) {
-        self.token.set_value(new_value)
+    #[getter]
+    fn get_value(&self) -> PyResult<String> {
+        Ok(self.token.value.clone())
+    }
+
+    #[setter]
+    pub fn set_value(&mut self, new_value: String) -> () {
+        self.token.set_value(new_value);
     }
 
     fn __str__(&self) -> PyResult<String>   {
