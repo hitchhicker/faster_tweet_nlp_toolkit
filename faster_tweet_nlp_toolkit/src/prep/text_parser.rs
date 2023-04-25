@@ -16,7 +16,7 @@ pub struct ParsedText {
     pub value: Option<String>,
 }
 
-impl  ParsedText{
+impl ParsedText{
     pub fn len(&self) -> usize {
         self.tokens.len()
     }

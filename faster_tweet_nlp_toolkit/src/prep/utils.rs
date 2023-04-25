@@ -6,6 +6,13 @@ use unicode_categories::UnicodeCategories;
 use lazy_static::lazy_static;
 use crate::constants::VARIATION_SELECTORS;
 
+/// Strip the accents
+/// # Example
+///
+/// ```
+/// use faster_tweet_nlp_toolkit::prep::utils::strip_accents_unicode;
+/// let result = strip_accents_unicode("être");  // expect "etre"
+/// ```
 pub fn strip_accents_unicode(text: &str) -> Cow<String> {
     let normlized_text = UnicodeNormalization::nfd(text).collect::<String>();
     let mut output: String = String::with_capacity(text.len());
@@ -17,6 +24,13 @@ pub fn strip_accents_unicode(text: &str) -> Cow<String> {
     return Cow::Owned(output)
 }
 
+/// Remove the variation selectors
+/// # Example
+///
+/// ```
+/// use faster_tweet_nlp_toolkit::prep::utils::remove_variation_selectors;
+/// let result = remove_variation_selectors("\u{fe00}");  // expect ""
+/// ```
 pub fn remove_variation_selectors(text: &str) -> String {
     let mut t = String::from(text);
     for var in VARIATION_SELECTORS.iter().collect::<Vec<_>>(){
@@ -25,6 +39,13 @@ pub fn remove_variation_selectors(text: &str) -> String {
     return t
 }
 
+/// Preprocess the URL so that the text appearing before the URL gets split from the URL.
+/// # Example
+///
+/// ```
+/// use faster_tweet_nlp_toolkit::prep::utils::preprocess_url;
+/// let result = preprocess_url(":http://url");  // expect ": http://url"
+/// ```
 pub fn preprocess_url(text: &str) -> String {
     lazy_static! {
         static ref HTTP_RE: Regex = Regex::new(r#"([^ ])(https?://)"#).unwrap();
