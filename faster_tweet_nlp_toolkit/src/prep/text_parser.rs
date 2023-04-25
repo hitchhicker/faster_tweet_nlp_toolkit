@@ -194,7 +194,7 @@ pub fn preprocess_text(
     if strip_accents.unwrap_or(false) {
         text = strip_accents_unicode(&text).to_string();
     }
-     if reduce_len.unwrap_or(false) {
+    if reduce_len.unwrap_or(false) {
         text = reduce_lengthening(&text);
     }
     text = remove_variation_selectors(&text);

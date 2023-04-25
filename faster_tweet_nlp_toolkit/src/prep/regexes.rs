@@ -97,8 +97,8 @@ lazy_static! {
     pub static ref RT_MENTION_PAT: Regex = REGEX_BUILDER.lock().unwrap().build(&(r#"^RT "#.to_string() + &MENTION + &r#": "#.to_string())).unwrap();
 
     // join all together
-    static ref _TOKEN_PIPELINE: [&'static str; 11] = [
-        &URL, &EMAIL, &MENTION, &HASHTAG, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
+    static ref _TOKEN_PIPELINE: [&'static str; 12] = [
+        &URL, &EMAIL, &MENTION, &HASHTAG, &EMOTICONS, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
     ];
     static ref TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.map(|x| x.to_string()).join(r"|"));
     pub static ref TWEET_TOKENIZE: Regex = REGEX_BUILDER.lock().unwrap().build(&TOKEN_PIPELINE).unwrap();

@@ -33,5 +33,11 @@ mod tests {
             tweet_tokenize("http://t.co/skU8zM7Slh :joy:".to_string()),
             expected_tokens
         );
+        let token_values = vec!["123", "@hello", "#world", r"\(^o^)/", "www.url.com", ":)", "abc@gmail.com"];
+        let expected_tokens: Vec<Token> = token_values.into_iter().map(|x| Token{value: x.to_owned()}).collect();
+        itertools::assert_equal(
+            tweet_tokenize(r"123 @hello #world \(^o^)/ www.url.com :) abc@gmail.com".to_string()),
+            expected_tokens
+        );
     }
 }
