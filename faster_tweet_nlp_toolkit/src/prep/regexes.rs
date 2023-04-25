@@ -26,8 +26,6 @@ static REGEX_BUILDER: Lazy<Mutex<RegexBuilder>> = Lazy::new(|| {
 lazy_static! {
     pub static ref HASHTAG: &'static str = r#"\#\b[\w\-_]+\b"#;
     pub static ref HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"\#\b[\w\-_]+\b"#).unwrap();
-    pub static ref WEIBO_HASHTAG: &'static str = r#"\#[^#]+#"#;
-    pub static ref WEIBO_HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^\#[^#]+#$"#).unwrap();
 
     pub static ref NOT_A_HASHTAG: &'static str = r#"\#\b[p{N}]+\b"#;
     pub static ref NOT_A_HASHTAG_RE: Regex = REGEX_BUILDER.lock().unwrap().build(r#"^\#\b[\p{N}]+\b$"#).unwrap();

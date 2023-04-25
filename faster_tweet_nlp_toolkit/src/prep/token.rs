@@ -213,57 +213,6 @@ impl Action{
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
-pub struct WeiboToken{
-    pub token: Token,
-}
-
-impl WeiboToken {
-    pub fn new(value: String) -> WeiboToken {
-        WeiboToken {token: Token{value: String::from(value)}}
-    }
-
-    pub fn set_value(&mut self, new_value: String) {
-        self.token = Token{value: String::from(new_value)};
-    }
-
-    pub fn is_emoji(&self) -> bool {
-        self.token.is_emoji()
-    }
-
-    pub fn is_punct(&self) -> bool {
-        self.token.is_punct()
-    }
-
-    pub fn is_hashtag(&self) -> bool {
-        self.token.check_flag(&WEIBO_HASHTAG_RE)
-    }
-
-    pub fn is_url(&self) -> bool {
-        self.token.is_url()
-    }
-
-    pub fn is_mention(&self) -> bool {
-        self.token.is_mention()
-    }
-
-    pub fn is_digit(&self) -> bool {
-        self.token.is_digit()
-    }
-
-    pub fn is_email(&self) -> bool {
-        self.token.is_email()
-    }
-
-    pub fn is_html_tag(&self) -> bool {
-        self.token.is_html_tag()
-    }
-
-    pub fn do_action(&mut self, action: &Action) -> bool {
-        action.apply(&mut self.token)
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -444,14 +393,6 @@ mod tests {
         let action = Action{action_name: Some("remove".to_owned()), action_condition: "is_hashtag".to_owned()};
         let mut token = Token{value: String::from("@hashtag")};
         assert_eq!(action.apply(&mut token), false)
-    }
-
-    #[rstest]
-    #[case("#中国", false)]
-    #[case("#中国#", true)]
-    fn test_is_weibo_hashtag(#[case] value: &str, #[case] expected: bool) {
-        let mut weibo_token = WeiboToken::new(String::from(value));
-        assert_eq!(expected, weibo_token.is_hashtag())
     }
 
     #[rstest]

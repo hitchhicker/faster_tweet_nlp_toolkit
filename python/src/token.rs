@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use ftnt::{prep::token::*, regexes::WEIBO_HASHTAG_RE};
+use ftnt::prep::token::*;
 use pyo3::prelude::*;
 use core::iter::Iterator;
 
@@ -193,67 +193,5 @@ impl PyAction {
     #[pyo3(text_signature = "(self, token)")]
     pub fn apply(&self, token: &mut PyToken) -> bool {
         self.action.apply(&mut token.token)
-    }
-}
-
-#[pyclass(module = "faster_tweet_nlp_toolkit", name = "WeiboToken")]
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
-pub struct PyWeiboToken{
-    token: WeiboToken,
-}
-
-impl From<WeiboToken> for PyWeiboToken {
-    fn from(token: WeiboToken) -> Self {
-        Self { token}
-    }
-}
-
-#[pymethods]
-impl PyWeiboToken {
-    #[new]
-    pub fn new(value: String) -> PyWeiboToken {
-        WeiboToken::new(value).into()
-    }
-
-    #[pyo3(text_signature = "(self, new_value)")]
-    pub fn set_value(&mut self, new_value: String) {
-        self.token.set_value(new_value)
-    }
-
-    pub fn is_emoji(&self) -> bool {
-        self.token.is_emoji()
-    }
-
-    pub fn is_punct(&self) -> bool {
-        self.token.is_punct()
-    }
-
-    pub fn is_hashtag(&self) -> bool {
-        self.token.token.check_flag(&WEIBO_HASHTAG_RE)
-    }
-
-    pub fn is_url(&self) -> bool {
-        self.token.is_url()
-    }
-
-    pub fn is_mention(&self) -> bool {
-        self.token.is_mention()
-    }
-
-    pub fn is_digit(&self) -> bool {
-        self.token.is_digit()
-    }
-
-    pub fn is_email(&self) -> bool {
-        self.token.is_email()
-    }
-
-    pub fn is_html_tag(&self) -> bool {
-        self.token.is_html_tag()
-    }
-
-    #[pyo3(text_signature = "(self, action)")]
-    pub fn do_action(&mut self, action: &PyAction) -> bool {
-        action.action.apply(&mut self.token.token)
     }
 }
