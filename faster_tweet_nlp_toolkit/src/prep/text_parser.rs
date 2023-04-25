@@ -5,8 +5,8 @@ use lazy_static::{__Deref, lazy_static};
 use pcre2::bytes::{Regex, Match};
 use encoding_rs::{self, REPLACEMENT};
 
-use crate::{prep::token::{Token, Action}, utils::{strip_accents_unicode, remove_variation_selectors}};
-
+use crate::prep::token::{Token, Action};
+use crate::prep::utils::{strip_accents_unicode, remove_variation_selectors, preprocess_url};
 use crate::prep::tokenizer::tweet_tokenize;
 
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -126,7 +126,7 @@ impl IndexMut<usize> for ParsedText{
     }
 }
 
-pub fn _parse_text(
+fn _parse_text(
     clean_text: String,
     tokenizer: Option<fn(String) -> Vec<Token>>,
     filters: Option<HashSet<&str>>,
@@ -199,12 +199,9 @@ pub fn preprocess_text(
     }
     text = remove_variation_selectors(&text);
 
-    lazy_static! {
-        static ref HTTP_RE: Regex = Regex::new(r#"([^ ])(https?://)"#).unwrap();
-    }
-    let pattern: &Regex = &HTTP_RE;
-    text = String::from_utf8(pattern.replace_all(&text.as_bytes(), "$1 $2".as_bytes()).to_vec()).unwrap();
+    text = preprocess_url(&text);
 
+    // c?est -> c'est
     lazy_static! {
         static ref REPEAT_RE: Regex = Regex::new(r#"(?:P<x>\w+)\?(?:P<y>\w+)"#).unwrap();
     }
@@ -214,6 +211,8 @@ pub fn preprocess_text(
     text = html_escape::decode_html_entities(&text).to_string();
     return text
 }
+
+
 
 pub fn parse_text(
     text: String,
@@ -457,28 +456,4 @@ mod tests {
     fn test_reduce_lengthening(#[case] text: &str, #[case] expected: &str) {
         assert_eq!(reduce_lengthening(text), expected);
     }
-    // TODO: support weibo_tokenize
-    // #[test]
-    // fn test_text_parser_with_weibo_token_class() {
-    //     //
-    //     let mut parsed_text = parse_text(
-    //         String::from("@招商银行 我只是想#改个电话号码#而已。"),
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         weibo_tokenize,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None,
-    //         None
-    //     );
-    // }
 }

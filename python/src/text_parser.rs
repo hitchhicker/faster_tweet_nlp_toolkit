@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 use std::collections::HashSet;
 
-use ftnt::{text_parser::{ParsedText, _parse_text}, token::{Action, Token}, tokenizer::tweet_tokenize};
+use ftnt::{text_parser::ParsedText, token::{Action, Token}, tokenizer::tweet_tokenize};
 use ftnt::text_parser::parse_text as parse_text_rust;
 use ftnt::text_parser::preprocess_text as preprocess_text_rust;
 use pyo3::prelude::*;
@@ -31,7 +31,6 @@ impl PyParsedText {
         self.__str__()
     }
 
-    // TODO: How to modify one token given index without invoking the function set_value?
     #[getter]
     fn tokens(&self) -> Vec<PyToken> {
         self.parsed_text.tokens.iter().map(|x| PyToken::from(x.clone())).collect()

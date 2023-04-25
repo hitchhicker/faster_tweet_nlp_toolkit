@@ -27,12 +27,11 @@ mod tests {
             expected_tokens
         );
 
-        // TODO: Refact the tokenizer function to make it passed
-        // let token_values = vec![":", "http://t.co/skU8zM7Slh", ":joy:"];
-        // let expected_tokens: Vec<Token> = token_values.into_iter().map(|x| Token{value: x.to_owned()}).collect();
-        // itertools::assert_equal(
-        //     tweet_tokenize(":http://t.co/skU8zM7Slh :joy:".to_string()),
-        //     expected_tokens
-        // );
+        let token_values = vec!["http://t.co/skU8zM7Slh", ":joy:"];
+        let expected_tokens: Vec<Token> = token_values.into_iter().map(|x| Token{value: x.to_owned()}).collect();
+        itertools::assert_equal(
+            tweet_tokenize("http://t.co/skU8zM7Slh :joy:".to_string()),
+            expected_tokens
+        );
     }
 }

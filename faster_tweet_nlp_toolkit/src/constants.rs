@@ -30,15 +30,6 @@ lazy_static! {
         "\u{fe0e}",
         "\u{fe0f}",
     ];
-    pub static ref JAPANESE_LANGUAGE_CODE: &'static str = "ja";
-    pub static ref CHINESE_LANGUAGE_CODE: &'static str = "zh";
-    pub static ref THAI_LANGUAGE_CODE: &'static str = "th";
-    pub static ref SUPPORTED_LANGUAGES: [&'static str; 3] = [
-        &JAPANESE_LANGUAGE_CODE,
-        &CHINESE_LANGUAGE_CODE,
-        &THAI_LANGUAGE_CODE,
-    ];
-
     pub static ref REPLACE_MAPPINGS: HashMap<&'static str, &'static str> = HashMap::from([
         ("is_mention", *MENTION_TAG),
         ("is_hashtag", *HASHTAG_TAG),

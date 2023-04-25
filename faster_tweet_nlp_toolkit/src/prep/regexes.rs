@@ -102,11 +102,5 @@ lazy_static! {
     ];
     static ref TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.map(|x| x.to_string()).join(r"|"));
     pub static ref TWEET_TOKENIZE: Regex = REGEX_BUILDER.lock().unwrap().build(&TOKEN_PIPELINE).unwrap();
-
-    static ref _WEIBO_TOKEN_PIPELINE: [&'static str; 11] = [
-        &URL, &EMAIL, &MENTION, &HASHTAG, &HTML_TAG, &ASCII_ARROW, &DIGIT, &ELLIPSIS_DOTS, &EMOJI_STRING, &WORD, r#"\S"#
-    ];
-    static ref WEIBO_TOKEN_PIPELINE: &'static str = string_to_static_str(_TOKEN_PIPELINE.join("|"));
-    pub static ref WEIBO_TOKENIZE: Regex = REGEX_BUILDER.lock().unwrap().build(&TOKEN_PIPELINE).unwrap();
 }
 

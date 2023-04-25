@@ -47,28 +47,6 @@ fn _is_unicode_emoji(value: &str) -> bool {
     }
 }
 
-/*
-Error:
-   |
-40 |         &self.value.chars().nth(i).unwrap()
-   |         ^----------------------------------
-   |         ||
-   |         |temporary value created here
-   |         returns a reference to data owned by the current function
-*/
-// impl Index<usize> for Token {
-//     type Output = char;
-//     fn index(&self, i: usize) -> &Self::Output {
-//         &self.value.chars().nth(i).unwrap()
-//     }
-// }
-
-// impl IndexMut<usize> for Token {
-//     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-//         &mut self.value.chars().nth(i).unwrap()
-//     }
-// }
-
 impl Token{
     pub fn new(value: String) -> Self{
         Self { value: value }
