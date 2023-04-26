@@ -217,7 +217,66 @@ pub fn preprocess_text(
 
 /// Preprocess and parse the Tweet text
 ///
-/// Example
+/// Arguments:
+///
+/// * `text`: The input text to preprocess.
+/// * `encoding`: How do we encode the text, e.g., "utf-8".
+/// * `remove_unencodable_char`: In case of encoding error of a character it is replaced with '�'. This option allows removing the '�'.
+///     Otherwise a sequence of '�' is replaced by a single one, default to false.
+/// * `to_lower`: Whether to lowercase the text, default to true.
+/// * `strip_accents`: Whether to strip the accents, default to false.
+/// * `reduce_len`: Whether to remove repeated character sequences if it is repeated more than 4 times, default to false.
+/// * `tokenizer`: Function to tokenize the text (Converting `String` to `Vec<Token>`), default to `prep::tokenizer::tweet_tokenize`.
+/// * `filters`: A `HashSet` of tokens to filter out, default to None.
+/// * `emojis`: How to handle emojis, default to None.
+///
+///    Options:
+///    * "remove": remove all emojis
+///    * "tag": replaces the emoji by a tag `<EMOJI>`
+///    * "demojize": replaces the emoji by its textual representation, e.g. :musical_keyboard:
+///     list of emojis: <https://www.webfx.com/tools/emoji-cheat-sheet/>
+///    * "emojize": replaces the emoji by its unicode representation, e.g. 😰
+/// * `emoticons`: How to handle emoticons, default to None.
+///
+///    Options:
+///    * "remove": delete all emoticons
+///    * "tag": replaces the emoticon by a tag `<EMOTICON>`
+/// * `mentions`: How to handle mentions, default to None.
+///
+///    Options:
+///    * "remove": delete all mentions
+///    * "tag": replaces the mention by a tag `<MENTION>`
+/// * `hashtags`: How to handle hashtags, default to None.
+///
+///    Options:
+///    * "remove": delete all hashtags
+///    * "tag": replaces the hashtag by a tag `<HASHTAG>`
+/// * `urls`: How to handle urls, default to None.
+///
+///    Options:
+///    * "remove": delete all urls
+///    * "tag": replaces the urls by a tag `<URL>`
+/// * `digits`: How to handle digits, default to None.
+///
+///    Options:
+///    * "remove": delete all digits
+///    * "tag": replaces the digit by a tag `<DIGIT>`
+/// * `puncts`: How to handle puncts, default to None.
+///
+///    Options:
+///    * "remove": delete all puncts
+///    * "tag": replaces the puncts by a tag `<PUNCT>`
+/// * `emails`: How to handle emails, default to None.
+///
+///    Options:
+///    * "remove": delete all emails
+///    * "tag": replaces the emails by a tag `<EMAIL>`
+/// * `html_tags`: How to handle HTML tags like `<div>`, default to None.
+///
+///    Options:
+///    * "remove": delete all HTML tags
+///
+/// Example:
 /// ```
 /// use faster_tweet_nlp_toolkit::prep::text_parser::parse_text;
 /// let parsed_text = parse_text(
@@ -229,14 +288,14 @@ pub fn preprocess_text(
 ///     None,
 ///     None,
 ///     None,
-///     Some("remove"),
-///     Some("remove"),
+///     Some("remove"), // emojis
+///     Some("remove"), // emoticons
 ///     None,
 ///     None,
-///     Some("remove"),
-///     Some("remove"),
+///     Some("remove"), // urls
+///     Some("remove"), // digits
 ///     None,
-///     Some("remove"),
+///     Some("remove"), // emails
 ///     None,
 /// );
 /// // expect ParsedText { tokens: [Token { value: "@hello" }, Token { value: "#world" }], split: " ", value: Some("@hello #world") }
