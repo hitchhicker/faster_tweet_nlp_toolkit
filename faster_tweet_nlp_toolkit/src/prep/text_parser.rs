@@ -73,7 +73,9 @@ impl ParsedText{
     }
 
     pub fn hashtags(&self) -> Vec<String> {
-        return self.tokens.iter().map(|x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
+        return self.tokens.iter().filter(
+            |token| token.is_hashtag()).map(
+                |x| x.clone()).map(|x| String::from(x.value)).collect::<Vec<String>>()
     }
 
     pub fn mentions(&self) -> Vec<String> {
@@ -161,6 +163,7 @@ fn _parse_text(
         emails,
         html_tags,
     );
+    parsed_text.post_process();
     return parsed_text
 }
 
@@ -212,8 +215,38 @@ pub fn preprocess_text(
     return text
 }
 
-
-
+/// Preprocess and parse the Tweet text
+///
+/// Example
+/// ```
+/// use faster_tweet_nlp_toolkit::prep::text_parser::parse_text;
+/// let parsed_text = parse_text(
+///     String::from("123 @hello #world www.url.com :) abc@gmail.com"),
+///     None,
+///     None,
+///     None,
+///     None,
+///     None,
+///     None,
+///     None,
+///     Some("remove"),
+///     Some("remove"),
+///     None,
+///     None,
+///     Some("remove"),
+///     Some("remove"),
+///     None,
+///     Some("remove"),
+///     None,
+/// );
+/// // expect ParsedText { tokens: [Token { value: "@hello" }, Token { value: "#world" }], split: " ", value: Some("@hello #world") }
+///
+/// parsed_text.hashtags();
+/// // expect ["#world"]
+///
+/// parsed_text.mentions();
+/// // expect ["@hello"]
+/// ```
 pub fn parse_text(
     text: String,
     encoding: Option<&str>,
@@ -237,7 +270,7 @@ pub fn parse_text(
     _parse_text(clean_text, tokenizer, filters, emojis, emoticons, mentions, hashtags, urls, digits, puncts, emails, html_tags)
 }
 
-pub fn reduce_lengthening(text: &str) -> String {
+fn reduce_lengthening(text: &str) -> String {
     lazy_static! {
         static ref LENGTHENING_RE: Regex = Regex::new(r#"(.)\1{2,}"#).unwrap();
     }
@@ -425,7 +458,7 @@ mod tests {
     #[case(None, None, None, None, None, None, None, Some("tag"), None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of <EMAIL> \(^o^)/ 123 ! #davidlynch #tvseries")]
     #[case(None, None, None, None, None, None,  None, Some("remove"), None, r"<p> c'est </p> @nlp https://www.google.fr cant wait 😰 for the new season of \(^o^)/ 123 ! #davidlynch #tvseries")]
     #[case(None, None, None, None, None, None, None, None, Some("remove"), r"c'est @nlp https://www.google.fr cant wait 😰 for the new season of tutu@gmail.com \(^o^)/ 123 ! #davidlynch #tvseries")]
-    fn test_text_parser_post_process(
+    fn test_text_parser_process(
         #[case] mentions_action: Option<&str>,
         #[case] hashtags_action: Option<&str>,
         #[case] urls_action: Option<&str>,
