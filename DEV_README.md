@@ -6,6 +6,7 @@ cargo build
 ### Building Python library
 ```
 cd python
+pip install maturin
 maturin develop
 ```
 ### Running unit tests
